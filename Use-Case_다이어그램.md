@@ -11,7 +11,7 @@
 
 ## 1. 전체 Use Case 개요
 
-![전체 Use Case 개요](./images/usecase/01-overview.png)
+![전체 Use Case 개요](docs/diagrams/images/usecase/01-overview.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>
@@ -56,7 +56,7 @@ flowchart LR
 
 ## 2. 주택 정보 서비스 Use Case
 
-![주택 정보 서비스 Use Case](./images/usecase/02-house-service.png)
+![주택 정보 서비스 Use Case](docs/diagrams/images/usecase/02-house-service.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>
@@ -100,7 +100,7 @@ flowchart LR
 
 ## 3. 계정 서비스 Use Case
 
-![계정 서비스 Use Case](./images/usecase/03-account-service.png)
+![계정 서비스 Use Case](docs/diagrams/images/usecase/03-account-service.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>
@@ -138,7 +138,7 @@ flowchart LR
 
 ## 4. 개인화 및 AI 검색 지원 Use Case
 
-![개인화 및 AI 검색 지원 Use Case](./images/usecase/04-personal-ai-service.png)
+![개인화 및 AI 검색 지원 Use Case](docs/diagrams/images/usecase/04-personal-ai-service.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>
@@ -173,7 +173,7 @@ flowchart LR
 
 ## 5. 공지 및 운영 관리 Use Case
 
-![공지 및 운영 관리 Use Case](./images/usecase/05-notice-operation.png)
+![공지 및 운영 관리 Use Case](docs/diagrams/images/usecase/05-notice-operation.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>
@@ -221,7 +221,7 @@ flowchart LR
 
 ## 6. 외부 시스템 연동 Use Case
 
-![외부 시스템 연동 Use Case](./images/usecase/06-external-systems.png)
+![외부 시스템 연동 Use Case](docs/diagrams/images/usecase/06-external-systems.png)
 
 <details>
 <summary>Mermaid 원본 보기</summary>

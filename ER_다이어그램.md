@@ -9,7 +9,7 @@
 
 ## 1. 실거래가 ERD
 
-![house erd](assets/house-erd.svg)
+![house erd](docs/diagrams/assets/house-erd.svg)
 
 <details>
 <summary>Mermaid source</summary>
@@ -90,7 +90,7 @@ erDiagram
 
 ## 2. 회원 기능 ERD
 
-![member erd](assets/member-erd.svg)
+![member erd](docs/diagrams/assets/member-erd.svg)
 
 <details>
 <summary>Mermaid source</summary>
@@ -157,7 +157,7 @@ erDiagram
 
 ## 3. 공공데이터 적재 추적 ERD
 
-![publicdata import erd](assets/publicdata-import-erd.svg)
+![publicdata import erd](docs/diagrams/assets/publicdata-import-erd.svg)
 
 <details>
 <summary>Mermaid source</summary>

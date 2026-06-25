@@ -1,65 +1,81 @@
-# NoHome Artifact
+# NoHome
 
-NoHome 전체 서비스를 실행하기 위한 Docker Compose와 프로젝트 문서를 관리하는 저장소입니다.
+NoHome은 공공데이터 기반 아파트 실거래가를 검색하고, 지도와 AI 도우미를 통해 원하는 주거 정보를 빠르게 확인할 수 있는 주택 검색 서비스입니다.
 
-NoHome은 공공데이터 아파트 매매 실거래가와 아파트 전월세 실거래가를 기반으로, 사용자가 지역/거래월/거래유형/가격 조건으로 실거래가를 검색하고 Kakao Map에서 위치를 확인할 수 있는 서비스입니다.
+## 주요 기능
 
-## 저장소 구성
+- 아파트 매매, 전세, 월세, 전월세 실거래가 검색
+- 시도/시군구/동, 아파트명, 거래월 조건 기반 검색
+- 거래 유형별 가격 필터와 정렬
+- Kakao Map 기반 위치 확인과 검색 결과 마커 표시
+- 회원가입, 로그인, 내 정보 조회 및 수정, 회원 탈퇴
+- 공지사항 조회와 관리자 공지 등록/수정/삭제
+- 관리자 회원 검색
+- AI 도우미를 통한 검색 조건 변경, 결과 요약, 페이지 이동 지원
 
-로컬에서는 다음 폴더명을 기준으로 둡니다.
+## 제출 문서
+
+루트에는 최종 제출용 문서를 모아두었습니다.
+
+| 문서 | 내용 |
+| --- | --- |
+| [요구사항_정의서.md](요구사항_정의서.md) | 서비스 요구사항, 기능 명세, 데이터 기준 |
+| [WBS-간트_차트.md](WBS-간트_차트.md) | 작업 일정과 산출물 관리 |
+| [Use-Case_다이어그램.md](Use-Case_다이어그램.md) | 사용자와 외부 시스템 기준 유스케이스 |
+| [클래스_다이어그램.md](클래스_다이어그램.md) | 백엔드 주요 도메인 클래스 구조 |
+| [ER_다이어그램.md](ER_다이어그램.md) | 주요 테이블과 관계 |
+| [화면_설계서.md](화면_설계서.md) | 주요 화면 구성과 사용자 흐름 |
+
+보조 자료와 이미지 파일은 `docs/` 아래에 보관되어 있으며, 루트 문서에서 필요한 이미지와 자료를 참조합니다.
+
+## 실행 준비
+
+로컬에서는 다음 저장소들이 같은 상위 폴더에 있어야 합니다.
 
 ```text
 no-home/
-  no-home-backend/    Spring Boot API 서버
-  no-home-frontend/   Vue/Vite 화면
-  no-home-artifact/   문서와 Docker Compose
+  no-home-backend/
+  no-home-frontend/
+  no-home-artifact/
 ```
 
-`no-home-artifact/docker-compose.yml`은 `../no-home-backend`, `../no-home-frontend` 경로를 기준으로 이미지를 빌드합니다.
-
-## 사전 준비
+필요한 도구:
 
 - Docker Desktop
 - Git
 - Backend `.env`
 - Frontend `.env`
 
-처음 실행하기 전에 각 저장소의 예시 환경 파일을 복사합니다.
+Backend 환경 변수 파일을 준비합니다.
 
 ```powershell
 cd C:\SSAFY\no-home\no-home-backend
 Copy-Item .env.example .env
 ```
 
+Frontend 환경 변수 파일을 준비합니다.
+
 ```powershell
 cd C:\SSAFY\no-home\no-home-frontend
 Copy-Item .env.example .env
 ```
 
-Backend `.env`의 주요 값:
+주요 환경 변수:
 
 ```text
-MYSQL_DATABASE=no_home
-MYSQL_USER=no_home
-MYSQL_PASSWORD=no_home_dev_password
-MYSQL_ROOT_PASSWORD=root_dev_password
 PUBLIC_DATA_SERVICE_KEY=
 PUBLIC_DATA_APT_RENT_SERVICE_KEY=
 KAKAO_MAP_API_KEY=
-```
-
-- `PUBLIC_DATA_SERVICE_KEY`: 국토교통부 아파트 매매 실거래가 API key
-- `PUBLIC_DATA_APT_RENT_SERVICE_KEY`: 국토교통부 아파트 전월세 실거래가 API key
-
-Frontend `.env`의 주요 값:
-
-```text
 VITE_KAKAO_MAP_API_KEY=
 ```
 
-## Docker로 전체 실행
+- `PUBLIC_DATA_SERVICE_KEY`: 아파트 매매 실거래가 공공데이터 API 키
+- `PUBLIC_DATA_APT_RENT_SERVICE_KEY`: 아파트 전월세 실거래가 공공데이터 API 키
+- `KAKAO_MAP_API_KEY`, `VITE_KAKAO_MAP_API_KEY`: Kakao Map 사용을 위한 키
 
-Artifact 저장소에서 Backend, Frontend, MySQL을 함께 실행합니다.
+## Docker Compose 실행
+
+`no-home-artifact`에서 Backend, Frontend, MySQL을 함께 실행합니다.
 
 ```powershell
 cd C:\SSAFY\no-home\no-home-artifact
@@ -94,78 +110,37 @@ docker compose logs -f mysql
 docker compose down
 ```
 
-DB 데이터까지 삭제하려면 volume을 함께 삭제합니다. 기존 MySQL 데이터가 사라지므로 필요한 경우에만 사용합니다.
+데이터베이스 볼륨까지 삭제해야 할 때만 다음 명령을 사용합니다.
 
 ```powershell
 docker compose down -v
 ```
 
+## 사용 방법
+
+1. Frontend 주소로 접속합니다.
+2. 지역, 아파트명, 거래월, 거래 유형을 선택해 실거래가를 검색합니다.
+3. 검색 결과 목록과 지도 마커에서 아파트 위치와 거래 정보를 확인합니다.
+4. 가격 조건이나 정렬을 바꿔 원하는 결과를 좁힙니다.
+5. 회원가입 또는 로그인 후 내 정보 관리, 공지사항 확인, AI 도우미 기능을 사용할 수 있습니다.
+6. 관리자 계정은 공지사항 관리와 회원 검색 기능을 사용할 수 있습니다.
+
 ## 코드 변경 반영
 
-Docker Desktop에서 컨테이너를 `Stop` 후 `Start`하는 것은 기존 이미지를 다시 실행하는 동작입니다. 로컬 코드 변경을 반영하려면 이미지를 다시 빌드해야 합니다.
-
-전체 재빌드:
+코드를 수정한 뒤 컨테이너에 반영하려면 이미지를 다시 빌드합니다.
 
 ```powershell
 docker compose up -d --build --force-recreate
 ```
 
-Frontend만 변경:
+Frontend만 다시 빌드:
 
 ```powershell
 docker compose up -d --build --force-recreate frontend
 ```
 
-Backend만 변경:
+Backend만 다시 빌드:
 
 ```powershell
 docker compose up -d --build --force-recreate backend
 ```
-
-## 검색 기능 요약
-
-브라우저 검색은 다음 거래 유형을 지원합니다.
-
-| 거래 유형 | 의미 | 가격 필터 |
-| --- | --- | --- |
-| 매매 | 아파트 매매 실거래가 | 매매가 |
-| 전세 | 아파트 전월세 API 중 월세 0원 | 보증금 |
-| 월세 | 아파트 전월세 API 중 월세 0원 초과 | 보증금 + 월세 |
-| 전월세 | 전세 + 월세 | 가격 필터 없음 |
-| 전체 | 매매 + 전세 + 월세 | 가격 필터 없음 |
-
-`서울특별시`를 선택한 경우 시군구를 반드시 선택해야 검색합니다. 서울 전체 자동수집은 호출량이 커서 브라우저 검색 옵션에서 제공하지 않습니다.
-
-## 테스트
-
-Backend:
-
-```powershell
-cd C:\SSAFY\no-home\no-home-backend
-.\mvnw.cmd test
-```
-
-Frontend:
-
-```powershell
-cd C:\SSAFY\no-home\no-home-frontend
-npm.cmd test
-npm.cmd run build
-```
-
-## 문서 목록
-
-```text
-no-home-artifact/
-  README.md
-  docs/
-    PRD.md
-    spec.md
-    plan.md
-    sprints/
-```
-
-참고 API 문서:
-
-- `아파트 매매 실거래가 자료 기술문서.pdf`
-- `아파트 전월세 실거래가 자료 기술문서.pdf`

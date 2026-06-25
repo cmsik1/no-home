@@ -132,6 +132,6 @@ gantt
 ---
 
 ## 5. 관련 산출물
-- 요구사항 명세서: [requirements-spec.md](requirements-spec.md)
-- 시스템 다이어그램: [클래스](../diagrams/class-diagrams.md) · [ERD](../diagrams/erd.md) · [유스케이스](../diagrams/usecase-diagrams.md)
-- 발표자료: [presentation/](../presentation/README.md)
+- 요구사항 명세서: [요구사항_정의서.md](요구사항_정의서.md)
+- 시스템 다이어그램: [클래스](클래스_다이어그램.md) · [ERD](ER_다이어그램.md) · [유스케이스](Use-Case_다이어그램.md)
+- 발표자료: [docs/presentation/](docs/presentation/README.md)
