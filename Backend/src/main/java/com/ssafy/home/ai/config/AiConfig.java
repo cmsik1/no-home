@@ -1,0 +1,103 @@
+package com.ssafy.home.ai.config;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Spring AI 챗봇 기반 설정.
+ * <p>
+ * Spring AI 자동 구성이 제공하는 {@link ChatClient.Builder}(OpenAI/GMS 프록시 모델)를 받아
+ * {@link ChatClient} 빈을 노출한다. 진단 advisor는 명시적으로 활성화한 경우에만 원문을 제외한
+ * 메타데이터를 기록한다. 모델/키 설정은 application.properties의 {@code spring.ai.openai.*}
+ * 값(환경변수 {@code SSAFY_GMS_API_KEY})에서 주입된다.
+ */
+@Configuration
+public class AiConfig {
+
+    // SSAFY_GMS_API_KEY 미설정 시 EnvironmentPostProcessor가 app.ai.chat.available=false로 내려
+    // 이 빈을 만들지 않는다(자동구성도 비활성). 키가 있으면 matchIfMissing으로 정상 생성된다.
+    /**
+     * 단기 대화기억. <b>휘발성 InMemory</b> 저장소 기반 메시지 윈도우(최근 N개). 시스템 메시지는 윈도우 정책상 보존된다.
+     * conversationId는 프론트가 세션 단위(sessionStorage UUID)로 생성해 각 요청에 전달한다 → 브라우저 챗 세션을
+     * 닫으면 새 conversationId가 되어 대화가 초기화된다. 질문 원문·답변을 영속 저장하지 않아 개인정보 보관 부담이 없다.
+     */
+    @Bean
+    public ChatMemory chatMemory(
+            @Value("${ai.chat.memory.max-messages:10}") int maxMessages
+    ) {
+        return MessageWindowChatMemory.builder()
+                .chatMemoryRepository(new InMemoryChatMemoryRepository())
+                .maxMessages(maxMessages)
+                .build();
+    }
+
+    // SSAFY_GMS_API_KEY 미설정 시 EnvironmentPostProcessor가 app.ai.chat.available=false로 내려
+    // 이 빈을 만들지 않는다(자동구성도 비활성). 키가 있으면 matchIfMissing으로 정상 생성된다.
+    @Bean
+    @ConditionalOnProperty(name = "app.ai.chat.available", havingValue = "true", matchIfMissing = true)
+    public ChatClient chatClient(
+            ChatClient.Builder builder,
+            ChatMemory chatMemory,
+            @Value("${ai.chat.logging.diagnostics-enabled:false}") boolean diagnosticsEnabled
+    ) {
+        List<Advisor> advisors = new ArrayList<>();
+        // 대화기억 advisor: conversationId별 최근 대화를 모델 호출에 자동 주입/저장.
+        advisors.add(MessageChatMemoryAdvisor.builder(chatMemory).build());
+        if (diagnosticsEnabled) {
+            advisors.add(new SimpleLoggerAdvisor(
+                    AiConfig::summarizeRequest,
+                    AiConfig::summarizeResponse,
+                    Ordered.HIGHEST_PRECEDENCE));
+        }
+        builder.defaultAdvisors(advisors.toArray(new Advisor[0]));
+        return builder.build();
+    }
+
+    /**
+     * 프롬프트 원문과 advisor context를 제외하고 메시지 개수만 기록한다.
+     */
+    static String summarizeRequest(ChatClientRequest request) {
+        int messageCount = request == null || request.prompt() == null
+                ? 0
+                : request.prompt().getInstructions().size();
+        return "messages=%d".formatted(messageCount);
+    }
+
+    /**
+     * 모델 응답 원문을 제외하고 결과 개수와 공급자 token 사용량만 기록한다.
+     */
+    static String summarizeResponse(ChatResponse response) {
+        if (response == null) {
+            return "results=0, toolCalls=false, promptTokens=unknown, completionTokens=unknown, totalTokens=unknown";
+        }
+
+        Usage usage = response.getMetadata() == null ? null : response.getMetadata().getUsage();
+        return "results=%d, toolCalls=%s, promptTokens=%s, completionTokens=%s, totalTokens=%s"
+                .formatted(
+                        response.getResults() == null ? 0 : response.getResults().size(),
+                        response.hasToolCalls(),
+                        tokenCount(usage == null ? null : usage.getPromptTokens()),
+                        tokenCount(usage == null ? null : usage.getCompletionTokens()),
+                        tokenCount(usage == null ? null : usage.getTotalTokens()));
+    }
+
+    private static String tokenCount(Integer count) {
+        return count == null ? "unknown" : count.toString();
+    }
+}
