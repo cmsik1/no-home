@@ -1,0 +1,22 @@
+{
+  "name": "no-home-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "node --test src/houseSearchParams.test.js src/agentMapping.test.js src/chat/chatClient.test.js src/chat/agentClient.test.js src/chat/agentActions.test.js",
+    "test:auto-import": "node --test src/houseSearchParams.test.js",
+    "test:widget": "node --test src/chat/chatClient.test.js",
+    "test:agent": "node --test src/agentMapping.test.js src/chat/agentClient.test.js src/chat/agentActions.test.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "3.5.12"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "5.1.4",
+    "vite": "5.4.10"
+  }
+}
