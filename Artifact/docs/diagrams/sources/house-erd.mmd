@@ -1,0 +1,60 @@
+erDiagram
+  REGIONS ||--o{ HOUSES : contains
+  HOUSES ||--o{ HOUSE_DEALS : has
+
+  REGIONS {
+    BIGINT region_id PK
+    VARCHAR lawd_cd "idx_regions_lawd_cd, uq_regions_lawd_umd"
+    VARCHAR legal_dong_code
+    VARCHAR sido
+    VARCHAR sigungu
+    VARCHAR umd_nm "uq_regions_lawd_umd"
+    DECIMAL lat
+    DECIMAL lng
+    DATETIME created_at
+    DATETIME updated_at
+  }
+
+  HOUSES {
+    BIGINT house_id PK
+    BIGINT region_id FK "idx_houses_region_id"
+    VARCHAR sgg_cd "uq_houses_source_identity"
+    VARCHAR umd_nm "uq_houses_source_identity"
+    VARCHAR jibun "uq_houses_source_identity"
+    VARCHAR apt_nm "idx_houses_apt_nm, uq_houses_source_identity"
+    INT build_year "uq_houses_source_identity"
+    DECIMAL lat
+    DECIMAL lng
+    DATETIME created_at
+    DATETIME updated_at
+  }
+
+  HOUSE_DEALS {
+    BIGINT deal_id PK
+    BIGINT house_id FK "idx_house_deals_house_date"
+    VARCHAR source_api
+    VARCHAR lawd_cd "idx_house_deals_lawd_ymd"
+    CHAR deal_ymd "idx_house_deals_lawd_ymd"
+    VARCHAR house_type
+    VARCHAR deal_type "idx_house_deals_deal_mode"
+    INT deal_year
+    INT deal_month
+    INT deal_day
+    DATE deal_date "idx_house_deals_house_date"
+    VARCHAR deal_amount
+    INT deal_amount_manwon
+    VARCHAR rent_type
+    VARCHAR deposit
+    INT deposit_manwon
+    VARCHAR monthly_rent
+    INT monthly_rent_manwon
+    DECIMAL exclu_use_ar
+    INT floor
+    VARCHAR contract_term
+    VARCHAR contract_type
+    VARCHAR use_rr_right
+    CHAR api_row_hash "uq_house_deals_api_row_hash"
+    JSON raw_response
+    DATETIME created_at
+    DATETIME updated_at
+  }

@@ -1,0 +1,46 @@
+erDiagram
+  MEMBERS ||--o| MEMBER_REFRESH_TOKENS : owns
+  MEMBERS ||--o{ NOTICES : writes
+  MEMBERS ||--o{ INTEREST_REGIONS : bookmarks
+  REGIONS ||--o{ INTEREST_REGIONS : referenced_by
+
+  MEMBERS {
+    BIGINT member_id PK
+    VARCHAR email "uq_members_email"
+    VARCHAR password_hash
+    VARCHAR name
+    VARCHAR phone
+    DATETIME created_at
+    DATETIME updated_at
+  }
+
+  MEMBER_REFRESH_TOKENS {
+    BIGINT member_id PK,FK
+    CHAR token_hash "uq_member_refresh_tokens_hash"
+    DATETIME expires_at
+    DATETIME created_at
+    DATETIME updated_at
+  }
+
+  NOTICES {
+    BIGINT notice_id PK
+    BIGINT member_id FK "idx_notices_member_id"
+    VARCHAR title
+    TEXT content
+    DATETIME created_at "idx_notices_created_at"
+    DATETIME updated_at
+  }
+
+  INTEREST_REGIONS {
+    BIGINT interest_region_id PK
+    BIGINT member_id FK "idx_interest_regions_member_id, uq_interest_regions_member_region"
+    BIGINT region_id FK "idx_interest_regions_region_id, uq_interest_regions_member_region"
+    DATETIME created_at
+  }
+
+  REGIONS {
+    BIGINT region_id PK
+    VARCHAR lawd_cd
+    VARCHAR sigungu
+    VARCHAR umd_nm
+  }

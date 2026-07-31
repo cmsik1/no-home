@@ -1,0 +1,81 @@
+classDiagram
+direction LR
+
+class MemberController {
+  signup()
+  login()
+  refresh()
+  logout()
+  me()
+  updateMe()
+  deleteMe()
+}
+class MemberService {
+  signup()
+  login()
+  resetPassword()
+  update()
+  delete()
+}
+class MemberAuthService {
+  login()
+  refresh()
+  logout()
+}
+class MemberMapper {
+  insert()
+  selectByEmail()
+  selectById()
+  update()
+  delete()
+}
+class RefreshTokenMapper {
+  upsert()
+  select()
+  delete()
+}
+class JwtAuthenticationInterceptor {
+  preHandle()
+}
+class JwtTokenService {
+  issue()
+  verify()
+}
+class AuthCookieService {
+  writeTokenPair()
+  clear()
+}
+class PasswordHasher {
+  hash()
+  matches()
+}
+class TokenHash {
+  sha256()
+}
+class MemberResponse
+class MemberSignupRequest
+class MemberLoginRequest
+class PasswordResetRequest
+class MemberUpdateRequest
+class JwtTokenPair
+class JwtClaims
+
+MemberController --> MemberService : member CRUD
+MemberController --> MemberAuthService : auth flow
+MemberController --> AuthCookieService : cookies
+MemberController --> MemberResponse : returns
+MemberService --> MemberMapper : persists
+MemberService --> PasswordHasher : hashes
+MemberService --> MemberResponse : returns
+MemberAuthService --> MemberService : validates credentials
+MemberAuthService --> JwtTokenService : issues/verifies
+MemberAuthService --> RefreshTokenMapper : stores refresh token
+MemberAuthService --> TokenHash : hashes refresh token
+JwtAuthenticationInterceptor --> AuthCookieService : reads access cookie
+JwtAuthenticationInterceptor --> JwtTokenService : verifies access token
+JwtTokenService --> JwtTokenPair : issues
+JwtTokenService --> JwtClaims : verifies
+MemberController --> MemberSignupRequest : accepts
+MemberController --> MemberLoginRequest : accepts
+MemberController --> PasswordResetRequest : accepts
+MemberController --> MemberUpdateRequest : accepts

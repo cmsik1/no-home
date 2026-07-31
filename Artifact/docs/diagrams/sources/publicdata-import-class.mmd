@@ -1,0 +1,71 @@
+classDiagram
+direction LR
+
+class PublicDataImportController {
+  importAptTrades()
+}
+class PublicDataImportService {
+  importAptTrades()
+}
+class PublicDataAptRentImportService {
+  importAptRents()
+}
+class PublicDataLiveSearchService {
+  search()
+}
+class PublicDataBatchPersistService {
+  persistAsync()
+}
+class PublicDataAptTradeClient {
+  fetch()
+}
+class PublicDataAptRentClient {
+  fetch()
+}
+class PublicDataAptTradeXmlParser {
+  parse()
+}
+class PublicDataAptRentXmlParser {
+  parse()
+}
+class AptTradeImportCommandFactory {
+  toPersistRows()
+}
+class AptRentImportCommandFactory {
+  toPersistRows()
+}
+class PublicDataImportMapper {
+  upsertRegion()
+  upsertHouse()
+  insertHouseDeal()
+  upsertImportBatch()
+}
+class PublicDataApiKeyProvider
+class AptTradeApiResponse
+class AptRentApiResponse
+class HouseUpsertCommand
+class HouseDealInsertCommand
+class PublicDataImportResult
+
+PublicDataImportController --> PublicDataImportService : delegates
+PublicDataImportService --> PublicDataAptTradeClient : fetches
+PublicDataImportService --> PublicDataAptTradeXmlParser : parses
+PublicDataImportService --> AptTradeImportCommandFactory : converts
+PublicDataImportService --> PublicDataImportMapper : persists
+PublicDataImportService --> PublicDataImportResult : returns
+PublicDataAptRentImportService --> PublicDataAptRentClient : fetches
+PublicDataAptRentImportService --> PublicDataAptRentXmlParser : parses
+PublicDataAptRentImportService --> AptRentImportCommandFactory : converts
+PublicDataAptRentImportService --> PublicDataImportMapper : persists
+PublicDataLiveSearchService --> PublicDataAptTradeClient : live sale
+PublicDataLiveSearchService --> PublicDataAptRentClient : live rent
+PublicDataLiveSearchService --> PublicDataBatchPersistService : async cache
+PublicDataBatchPersistService --> PublicDataImportMapper : persists
+PublicDataAptTradeClient --> PublicDataApiKeyProvider : reads key
+PublicDataAptRentClient --> PublicDataApiKeyProvider : reads key
+AptTradeImportCommandFactory --> HouseUpsertCommand : creates
+AptTradeImportCommandFactory --> HouseDealInsertCommand : creates
+AptRentImportCommandFactory --> HouseUpsertCommand : creates
+AptRentImportCommandFactory --> HouseDealInsertCommand : creates
+PublicDataAptTradeClient --> AptTradeApiResponse : returns
+PublicDataAptRentClient --> AptRentApiResponse : returns

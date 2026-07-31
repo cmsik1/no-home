@@ -1,0 +1,16 @@
+erDiagram
+  PUBLIC_DATA_IMPORT_BATCHES {
+    BIGINT import_batch_id PK
+    VARCHAR source_api "uq_import_batches_request"
+    VARCHAR lawd_cd "idx_import_batches_lawd_ymd, uq_import_batches_request"
+    CHAR deal_ymd "idx_import_batches_lawd_ymd, uq_import_batches_request"
+    VARCHAR house_type "uq_import_batches_request"
+    VARCHAR deal_type "uq_import_batches_request"
+    VARCHAR status
+    INT total_count
+    INT imported_count
+    INT skipped_count
+    TEXT error_message
+    DATETIME requested_at
+    DATETIME completed_at
+  }

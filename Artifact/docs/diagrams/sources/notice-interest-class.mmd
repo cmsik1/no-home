@@ -1,0 +1,55 @@
+classDiagram
+direction LR
+
+class NoticeController {
+  list()
+  create()
+  update()
+  delete()
+}
+class NoticeService {
+  findAll()
+  create()
+  update()
+  delete()
+}
+class NoticeMapper {
+  selectAll()
+  insert()
+  update()
+  delete()
+}
+class NoticeRequest
+class NoticeResponse
+class NoticeInsertCommand
+
+class InterestRegionController {
+  list()
+  add()
+  delete()
+}
+class InterestRegionService {
+  findAll()
+  add()
+  delete()
+}
+class InterestRegionMapper {
+  selectByMember()
+  insert()
+  delete()
+}
+class InterestRegionRequest
+class InterestRegionResponse
+class MemberMapper
+
+NoticeController --> NoticeService : delegates
+NoticeService --> NoticeMapper : persists
+NoticeService --> MemberMapper : checks author/admin
+NoticeService --> NoticeInsertCommand : creates
+NoticeService --> NoticeResponse : returns
+NoticeController --> NoticeRequest : accepts
+
+InterestRegionController --> InterestRegionService : delegates
+InterestRegionService --> InterestRegionMapper : persists
+InterestRegionService --> InterestRegionRequest : accepts
+InterestRegionService --> InterestRegionResponse : returns

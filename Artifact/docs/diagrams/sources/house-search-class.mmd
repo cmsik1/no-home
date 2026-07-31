@@ -1,0 +1,73 @@
+classDiagram
+direction LR
+
+class HouseController {
+  getRegions()
+  searchHouses()
+  getPriceRange()
+  getHouseDeals()
+}
+class HouseService {
+  findRegions()
+  searchHouseDeals()
+  searchPriceRange()
+  findHouseDeals()
+}
+class HouseMapper {
+  selectRegions()
+  searchHouseDeals()
+  countHouseDeals()
+  selectPriceRange()
+}
+class HouseSearchCondition {
+  lawdCd
+  sido
+  sigungu
+  umdNm
+  aptName
+  dealMode
+  startDealYmd
+  endDealYmd
+  sort
+}
+class HouseSearchPageResponse {
+  items
+  totalCount
+  page
+  size
+}
+class HouseSearchResultResponse {
+  aptNm
+  dealType
+  dealDate
+  dealAmountManwon
+  depositManwon
+  monthlyRentManwon
+}
+class HouseDealPriceRangeResponse
+class HouseDealResponse
+class RegionResponse
+class ImportBatchResponse
+class AutoImportRangeResponse
+class PublicDataLiveSearchService
+class PublicDataImportService
+class PublicDataAptRentImportService
+class AutoImportException
+class ApiRowHashGenerator
+
+HouseController --> HouseService : delegates
+HouseController --> HouseSearchCondition : builds
+HouseService --> HouseMapper : queries DB
+HouseService --> PublicDataLiveSearchService : live search
+HouseService --> PublicDataImportService : auto import sale
+HouseService --> PublicDataAptRentImportService : auto import rent
+HouseService --> AutoImportException : handles
+HouseService --> ApiRowHashGenerator : hashes rows
+HouseService --> HouseSearchPageResponse : returns
+HouseSearchPageResponse --> HouseSearchResultResponse : contains
+HouseService --> HouseDealPriceRangeResponse : returns
+HouseService --> HouseDealResponse : returns
+HouseService --> RegionResponse : returns
+HouseService --> ImportBatchResponse : returns
+HouseService --> AutoImportRangeResponse : uses metadata
+HouseMapper --> HouseSearchCondition : accepts

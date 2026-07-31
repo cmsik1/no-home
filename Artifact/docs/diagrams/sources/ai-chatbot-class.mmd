@@ -1,0 +1,80 @@
+classDiagram
+direction LR
+
+class AiAssistantController {
+  postAssistant()
+  buildSystemPrompt()
+  toAssistantResponse()
+}
+class ChatClient {
+  prompt()
+  call()
+  chatResponse()
+}
+class AiConfig {
+  chatMemory()
+  chatClient()
+}
+class HouseTools {
+  searchSeoulAptDeals()
+  dealYmdError()
+}
+class PageActionTools {
+  applyFiltersAndSearch()
+  setFilters()
+  paginate()
+  selectItem()
+  mapFocus()
+  reset()
+}
+class AgentCommand {
+  action
+  filters
+  page
+  direction
+  itemIndex
+  summary
+  question
+}
+class AgentCommandGuards {
+  validate()
+}
+class AssistantResponse {
+  type
+  answer
+  command
+  notice
+}
+class AiChatRateLimiter {
+  acquire()
+  release()
+}
+class AiRequests {
+  currentMemberId()
+  resolveConversationId()
+}
+class AiProviderErrors {
+  isTimeout()
+  isAuthFailure()
+}
+class SeoulLawdCodeResolver {
+  resolveLawdCd()
+}
+class ApiResponse~T~
+
+AiAssistantController --> ChatClient : calls
+AiAssistantController --> HouseTools : data tool
+AiAssistantController --> PageActionTools : action tool
+AiAssistantController --> AiChatRateLimiter : limits
+AiAssistantController --> AiRequests : member/session
+AiAssistantController --> AiProviderErrors : maps errors
+AiAssistantController --> AssistantResponse : wraps
+AiAssistantController --> ApiResponse~T~ : returns
+AiConfig --> ChatClient : creates
+AiConfig --> ChatMemory : creates
+HouseTools --> HouseService : searches deals
+PageActionTools --> AgentCommandGuards : validates
+PageActionTools --> AgentCommand : returns
+AgentCommandGuards --> SeoulLawdCodeResolver : validates region
+AgentCommandGuards --> HouseTools : reuses date guard
+AssistantResponse --> AgentCommand : contains

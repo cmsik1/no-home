@@ -1,0 +1,49 @@
+classDiagram
+direction LR
+
+class HomeApplication
+class ApiResponse~T~ {
+  success
+  message
+  data
+}
+class AuthWebConfig {
+  addInterceptors()
+}
+class MyBatisConfig
+class ProductionSecurityValidator {
+  afterPropertiesSet()
+}
+class HealthController {
+  health()
+}
+class HealthService {
+  health()
+}
+class HealthCheckMapper {
+  probe()
+}
+class HealthResponse
+class DatabaseHealth
+class SeoulLawdCodeResolver {
+  resolveLawdCd()
+}
+class SeoulLegalDongCatalog {
+  findByLawdCd()
+}
+class MojibakeRepairer {
+  repair()
+}
+class JwtAuthenticationInterceptor
+
+HomeApplication --> MyBatisConfig : boots
+AuthWebConfig --> JwtAuthenticationInterceptor : registers
+HealthController --> HealthService : delegates
+HealthService --> HealthCheckMapper : probes DB
+HealthService --> HealthResponse : returns
+HealthResponse --> DatabaseHealth : contains
+ProductionSecurityValidator --> AuthWebConfig : protects production config
+SeoulLawdCodeResolver --> SeoulLegalDongCatalog : resolves district
+ApiResponse~T~ --> HealthResponse : wraps responses
+ApiResponse~T~ --> MemberResponse : wraps responses
+ApiResponse~T~ --> HouseSearchPageResponse : wraps responses

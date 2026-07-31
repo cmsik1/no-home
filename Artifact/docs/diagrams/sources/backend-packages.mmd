@@ -1,0 +1,39 @@
+classDiagram
+direction LR
+
+class ai {
+  assistant endpoint
+  Spring AI tools
+}
+class house {
+  search API
+  house deal query
+}
+class publicdata {
+  external API import
+  live search cache
+}
+class member {
+  member profile
+  JWT auth
+}
+class notice {
+  notice CRUD
+}
+class interest {
+  bookmarked regions
+}
+class common {
+  response
+  config
+  health
+  region helpers
+}
+
+ai --> house : uses deal search
+house --> publicdata : imports and live searches
+member --> notice : authorizes admin notices
+member --> interest : owns bookmarks
+common --> ai : config and auth support
+common --> house : shared response and region helpers
+common --> member : auth interceptor config
