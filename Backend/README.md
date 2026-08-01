@@ -1,8 +1,8 @@
 # NoHome Backend
 
-NoHome의 Spring Boot API 서버입니다. 공공데이터 아파트 매매 실거래가와 아파트 전월세 실거래가를 조회하고, 필요한 경우 외부 공공데이터 API에서 거래 데이터를 가져와 MySQL에 저장한 뒤 DB 기반으로 검색합니다.
+NoHome의 Spring Boot API 서버입니다. 공공데이터 아파트 매매 실거래가와 아파트 전월세 실거래가를 조회하고, 필요한 경우 외부 공공데이터 API에서 거래 데이터를 가져와 PostgreSQL에 저장한 뒤 DB 기반으로 검색합니다.
 
-전체 서비스를 Docker로 실행할 때는 `no-home-artifact/docker-compose.yml`을 사용합니다.
+전체 서비스를 Docker로 실행할 때는 모노레포 루트의 `docker-compose.yml`을 사용합니다.
 
 ## 기술 스택
 
@@ -10,8 +10,9 @@ NoHome의 Spring Boot API 서버입니다. 공공데이터 아파트 매매 실�
 - Spring Boot
 - Spring AI
 - Maven
-- MyBatis
-- MySQL
+- Spring Data JPA
+- Flyway
+- PostgreSQL 17
 - Docker Compose
 
 ## 환경 변수
@@ -25,8 +26,8 @@ Copy-Item .env.example .env
 주요 환경 변수:
 
 ```text
-MYSQL_PORT=3306
-DB_URL=jdbc:mysql://localhost:3306/no_home?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+POSTGRES_PORT=5432
+DB_URL=jdbc:postgresql://localhost:5432/no_home
 DB_USERNAME=no_home
 DB_PASSWORD=no_home_dev_password
 PUBLIC_DATA_SERVICE_KEY=
@@ -42,16 +43,18 @@ AI_CHAT_RATE_LIMIT_ENABLED=true
 
 ## DB 실행
 
-Backend 저장소의 `docker-compose.yml`은 로컬 개발용 MySQL 컨테이너만 실행합니다.
+Compose 파일은 모노레포 루트에 하나만 둡니다. PostgreSQL만 실행하려면 루트에서 다음 명령을 사용합니다.
 
 ```powershell
-docker compose up -d mysql
+docker compose up -d postgres
 docker compose ps
-docker compose logs mysql
+docker compose logs postgres
 docker compose down
 ```
 
-Backend, Frontend, MySQL을 함께 실행하려면 `no-home-artifact` 저장소에서 실행합니다.
+Backend, Frontend, PostgreSQL을 함께 실행하려면 모노레포 루트에서 `docker compose up -d --build`를 실행합니다.
+
+백엔드가 시작될 때 Flyway가 `src/main/resources/db/migration`의 버전별 SQL을 적용합니다. PostgreSQL 컨테이너 초기화 스크립트나 Hibernate 자동 DDL에 의존하지 않습니다. 기존 MySQL 볼륨의 데이터는 자동 이관되지 않습니다.
 
 ## 패키지 구조
 
@@ -61,8 +64,12 @@ src/main/java/com/ssafy/home/
   common/          공통 설정, 헬스체크, 지역 보정, 문자 인코딩 보정
   house/           지역, 주택, 실거래가 검색
   member/          회원가입, 로그인, 로그아웃
+  notice/          공지사항
+  interest/        관심 지역
   publicdata/      공공데이터 API 호출 및 DB 저장
 ```
+
+각 기능은 Controller, Service, Persistence Port, JPA Adapter/Repository 순으로 의존합니다. 복잡한 검색과 upsert는 JPA adapter 내부의 native query로 캡슐화합니다.
 
 ## 주요 API
 
@@ -134,7 +141,7 @@ sequenceDiagram
   participant FE as Frontend
   participant HC as HouseController
   participant HS as HouseService
-  participant DB as MySQL
+  participant DB as PostgreSQL
   participant API as Public Data API
 
   FE->>HC: GET /api/houses/search

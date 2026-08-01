@@ -3,6 +3,8 @@ package com.ssafy.home.house.controller;
 import com.ssafy.home.house.dto.HouseSearchPageResponse;
 import com.ssafy.home.house.dto.HouseSearchResultResponse;
 import com.ssafy.home.house.dto.HouseDealPriceRangeResponse;
+import com.ssafy.home.house.dto.HouseSearchRequest;
+import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.house.service.AutoImportException;
 import com.ssafy.home.house.service.HouseService;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,10 +28,9 @@ class HouseControllerTest {
     @Test
     void searchHousesReturnsBadRequestWhenNoSearchConditionExists() throws Exception {
         HouseService houseService = mock(HouseService.class);
-        when(houseService.searchHouseDeals(null, null, null, null, null, null, null, null, null, null, true,
-                null, null, null, null, null, null, null, null))
+        when(houseService.searchHouseDeals(any(HouseSearchRequest.class)))
                 .thenThrow(new IllegalArgumentException("At least one search condition is required."));
-        MockMvc mockMvc = standaloneSetup(new HouseController(houseService)).build();
+        MockMvc mockMvc = mockMvc(houseService);
 
         mockMvc.perform(get("/api/houses/search"))
                 .andExpect(status().isBadRequest())
@@ -39,15 +41,13 @@ class HouseControllerTest {
     @Test
     void searchHousesReturnsCommonJsonResponse() throws Exception {
         HouseService houseService = mock(HouseService.class);
-        when(houseService.searchHouseDeals(
-                eq("11590"), eq(null), eq(null), eq(null), eq("River"), eq("202605"), eq(null), eq(null), eq(1), eq(20), eq(true),
-                eq("priceDesc"), eq(100000), eq(300000), eq(null), eq(null), eq(null), eq(null), eq(null)
-        )).thenReturn(new HouseSearchPageResponse(List.of(new HouseSearchResultResponse(
+        when(houseService.searchHouseDeals(any(HouseSearchRequest.class)))
+                .thenReturn(new HouseSearchPageResponse(List.of(new HouseSearchResultResponse(
                 1L, 2L, "River Apt", "Seoul", "Dongjak-gu", "Sangdo-dong", "335", 2018,
                 "11590", "202605", LocalDate.of(2026, 5, 20), "205,000", 205000,
                 null, 18, null, null
         )), 1, 20, 1, 120000, 280000, false, List.of(), List.of()));
-        MockMvc mockMvc = standaloneSetup(new HouseController(houseService)).build();
+        MockMvc mockMvc = mockMvc(houseService);
 
         mockMvc.perform(get("/api/houses/search")
                         .param("lawdCd", "11590")
@@ -74,10 +74,9 @@ class HouseControllerTest {
     @Test
     void housePriceRangeReturnsCurrentConditionRange() throws Exception {
         HouseService houseService = mock(HouseService.class);
-        when(houseService.findHouseDealPriceRange(
-                eq("11590"), eq(null), eq(null), eq(null), eq(null), eq("202605"), eq(null), eq(null), eq(false), eq(null)
-        )).thenReturn(new HouseDealPriceRangeResponse(100000, 300000));
-        MockMvc mockMvc = standaloneSetup(new HouseController(houseService)).build();
+        when(houseService.findHouseDealPriceRange(any(HouseSearchRequest.class)))
+                .thenReturn(new HouseDealPriceRangeResponse(100000, 300000));
+        MockMvc mockMvc = mockMvc(houseService);
 
         mockMvc.perform(get("/api/houses/price-range")
                         .param("lawdCd", "11590")
@@ -92,16 +91,12 @@ class HouseControllerTest {
     @Test
     void searchHousesReturnsServiceUnavailableWhenAutoImportKeyFails() throws Exception {
         HouseService houseService = mock(HouseService.class);
-        when(houseService.searchHouseDeals(
-                eq("11680"), eq(null), eq(null), eq(null), eq(null), eq("202605"),
-                eq(null), eq(null), eq(null), eq(null), eq(true), eq(null), eq(null), eq(null),
-                eq(null), eq(null), eq(null), eq(null), eq(null)
-        )).thenThrow(new AutoImportException(
+        when(houseService.searchHouseDeals(any(HouseSearchRequest.class))).thenThrow(new AutoImportException(
                 AutoImportException.Reason.KEY_INVALID,
                 "Auto import failed for lawdCd=11680, dealYmd=202605",
                 new RuntimeException("provider code 30")
         ));
-        MockMvc mockMvc = standaloneSetup(new HouseController(houseService)).build();
+        MockMvc mockMvc = mockMvc(houseService);
 
         mockMvc.perform(get("/api/houses/search")
                         .param("lawdCd", "11680")
@@ -113,20 +108,23 @@ class HouseControllerTest {
     @Test
     void priceRangeReturnsGatewayTimeoutWhenAutoImportTimesOut() throws Exception {
         HouseService houseService = mock(HouseService.class);
-        when(houseService.findHouseDealPriceRange(
-                eq("11680"), eq(null), eq(null), eq(null), eq(null), eq("202605"),
-                eq(null), eq(null), eq(true), eq(null)
-        )).thenThrow(new AutoImportException(
+        when(houseService.findHouseDealPriceRange(any(HouseSearchRequest.class))).thenThrow(new AutoImportException(
                 AutoImportException.Reason.TIMEOUT,
                 "Auto import failed for lawdCd=11680, dealYmd=202605",
                 new RuntimeException("timeout")
         ));
-        MockMvc mockMvc = standaloneSetup(new HouseController(houseService)).build();
+        MockMvc mockMvc = mockMvc(houseService);
 
         mockMvc.perform(get("/api/houses/price-range")
                         .param("lawdCd", "11680")
                         .param("dealYmd", "202605"))
                 .andExpect(status().isGatewayTimeout())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    private static MockMvc mockMvc(HouseService service) {
+        return standaloneSetup(new HouseController(service))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 }

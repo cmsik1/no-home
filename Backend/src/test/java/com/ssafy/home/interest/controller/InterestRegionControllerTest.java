@@ -1,12 +1,14 @@
 package com.ssafy.home.interest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.interest.dto.InterestRegionRequest;
 import com.ssafy.home.interest.dto.InterestRegionResponse;
 import com.ssafy.home.interest.service.InterestRegionErrorCode;
 import com.ssafy.home.interest.service.InterestRegionException;
 import com.ssafy.home.interest.service.InterestRegionService;
 import com.ssafy.home.member.auth.AuthCookieService;
+import com.ssafy.home.member.auth.CurrentMemberIdArgumentResolver;
 import com.ssafy.home.member.auth.JwtTokenService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -34,7 +36,7 @@ class InterestRegionControllerTest {
     void listUsesAccessCookieMember() throws Exception {
         InterestRegionService service = mock(InterestRegionService.class);
         when(service.findMyRegions(1L)).thenReturn(List.of(response(1L, "흑석동")));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(get("/api/interest-regions")
                         .cookie(accessCookie(1L)))
@@ -47,7 +49,7 @@ class InterestRegionControllerTest {
         InterestRegionService service = mock(InterestRegionService.class);
         when(service.addMyRegion(eq(null), any(InterestRegionRequest.class)))
                 .thenThrow(new InterestRegionException(InterestRegionErrorCode.UNAUTHENTICATED, "login required."));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(post("/api/interest-regions")
                         .contentType("application/json")
@@ -62,7 +64,7 @@ class InterestRegionControllerTest {
     void addAndDeleteReturnCommonResponses() throws Exception {
         InterestRegionService service = mock(InterestRegionService.class);
         when(service.addMyRegion(eq(1L), any(InterestRegionRequest.class))).thenReturn(response(3L, "흑석동"));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(post("/api/interest-regions")
                         .cookie(accessCookie(1L))
@@ -81,7 +83,14 @@ class InterestRegionControllerTest {
     }
 
     private static InterestRegionController controller(InterestRegionService service) {
-        return new InterestRegionController(service, cookieService(), tokenService());
+        return new InterestRegionController(service);
+    }
+
+    private static MockMvc mockMvc(InterestRegionService service) {
+        return standaloneSetup(controller(service))
+                .setCustomArgumentResolvers(new CurrentMemberIdArgumentResolver(tokenService(), cookieService()))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     private static AuthCookieService cookieService() {

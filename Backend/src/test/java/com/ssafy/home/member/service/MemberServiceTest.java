@@ -5,8 +5,8 @@ import com.ssafy.home.member.dto.MemberResponse;
 import com.ssafy.home.member.dto.MemberSignupRequest;
 import com.ssafy.home.member.dto.MemberUpdateRequest;
 import com.ssafy.home.member.dto.PasswordResetRequest;
-import com.ssafy.home.member.mapper.MemberInsertCommand;
-import com.ssafy.home.member.mapper.MemberMapper;
+import com.ssafy.home.member.persistence.MemberInsertCommand;
+import com.ssafy.home.member.persistence.MemberPersistencePort;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -162,7 +162,7 @@ class MemberServiceTest {
                 LocalDateTime.of(2026, 6, 1, 10, 0));
     }
 
-    private static class StubMemberMapper implements MemberMapper {
+    private static class StubMemberMapper implements MemberPersistencePort {
         private final Map<Long, Member> membersById = new HashMap<>();
         private MemberInsertCommand lastInsert;
         private long sequence = 1L;

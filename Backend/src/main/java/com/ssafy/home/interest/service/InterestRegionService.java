@@ -5,55 +5,59 @@ import com.ssafy.home.common.region.SeoulLegalDongCatalog;
 import com.ssafy.home.house.dto.RegionResponse;
 import com.ssafy.home.interest.dto.InterestRegionRequest;
 import com.ssafy.home.interest.dto.InterestRegionResponse;
-import com.ssafy.home.interest.mapper.InterestRegionMapper;
+import com.ssafy.home.interest.persistence.InterestRegionPersistencePort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class InterestRegionService {
 
-    private final InterestRegionMapper mapper;
+    private final InterestRegionPersistencePort interestRegionPersistencePort;
     private final SeoulLawdCodeResolver seoulLawdCodeResolver;
 
-    public InterestRegionService(InterestRegionMapper mapper, SeoulLawdCodeResolver seoulLawdCodeResolver) {
-        this.mapper = mapper;
+    public InterestRegionService(InterestRegionPersistencePort interestRegionPersistencePort, SeoulLawdCodeResolver seoulLawdCodeResolver) {
+        this.interestRegionPersistencePort = interestRegionPersistencePort;
         this.seoulLawdCodeResolver = seoulLawdCodeResolver;
     }
 
     public List<InterestRegionResponse> findMyRegions(Long memberId) {
         requireLogin(memberId);
-        return mapper.selectByMemberId(memberId).stream()
+        return interestRegionPersistencePort.selectByMemberId(memberId).stream()
                 .map(InterestRegionResponse::from)
                 .toList();
     }
 
+    @Transactional
     public InterestRegionResponse addMyRegion(Long memberId, InterestRegionRequest request) {
         requireLogin(memberId);
         RegionResponse region = resolveRegion(request);
-        Long regionId = mapper.selectRegionId(region.lawdCd(), region.umdNm())
+        Long regionId = interestRegionPersistencePort.selectRegionId(region.lawdCd(), region.umdNm())
                 .orElseGet(() -> insertAndFindRegion(region));
-        mapper.insertInterestRegion(memberId, regionId);
-        return mapper.selectByMemberId(memberId).stream()
+        interestRegionPersistencePort.insertInterestRegion(memberId, regionId);
+        return interestRegionPersistencePort.selectByMemberId(memberId).stream()
                 .filter(interestRegion -> regionId.equals(interestRegion.regionId()))
                 .findFirst()
                 .map(InterestRegionResponse::from)
                 .orElseThrow(() -> new InterestRegionException(InterestRegionErrorCode.NOT_FOUND, "interest region not found."));
     }
 
+    @Transactional
     public void deleteMyRegion(Long memberId, Long interestRegionId) {
         requireLogin(memberId);
         if (interestRegionId == null) {
             throw new InterestRegionException(InterestRegionErrorCode.VALIDATION, "interestRegionId is required.");
         }
-        if (mapper.deleteInterestRegion(memberId, interestRegionId) == 0) {
+        if (interestRegionPersistencePort.deleteInterestRegion(memberId, interestRegionId) == 0) {
             throw new InterestRegionException(InterestRegionErrorCode.NOT_FOUND, "interest region not found.");
         }
     }
 
     private Long insertAndFindRegion(RegionResponse region) {
-        mapper.insertRegion(region.lawdCd(), region.legalDongCode(), region.sido(), region.sigungu(), region.umdNm());
-        return mapper.selectRegionId(region.lawdCd(), region.umdNm())
+        interestRegionPersistencePort.insertRegion(region.lawdCd(), region.legalDongCode(), region.sido(), region.sigungu(), region.umdNm());
+        return interestRegionPersistencePort.selectRegionId(region.lawdCd(), region.umdNm())
                 .orElseThrow(() -> new InterestRegionException(InterestRegionErrorCode.NOT_FOUND, "region not found."));
     }
 

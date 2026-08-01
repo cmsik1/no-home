@@ -1,0 +1,76 @@
+.account-button,
+.primary-button,
+.secondary-button,
+.back-button,
+.danger-button {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 8px 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.account-button,
+.secondary-button,
+.back-button {
+  border-color: transparent;
+  background: var(--button-accent);
+  color: #ffffff;
+}
+
+.account-button.is-disabled {
+  background: var(--surface-tint);
+  color: #6c7788;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.primary-button {
+  border-color: transparent;
+  background: var(--button-accent);
+  color: #ffffff;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.account-button:hover,
+.back-button:hover {
+  border-color: transparent;
+  background: var(--button-accent-hover);
+  color: #ffffff;
+}
+
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.account-button:focus-visible,
+.back-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 68, 122, 0.22);
+}
+
+.primary-button.is-loading {
+  cursor: progress;
+  box-shadow: 0 0 0 3px rgba(52, 68, 122, 0.22);
+}
+
+.button-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.danger-button {
+  border-color: #c94b3d;
+  background: #c94b3d;
+  color: #ffffff;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 7px 11px;
+}
+

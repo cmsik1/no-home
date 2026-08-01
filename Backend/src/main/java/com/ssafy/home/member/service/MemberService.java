@@ -5,8 +5,8 @@ import com.ssafy.home.member.dto.MemberResponse;
 import com.ssafy.home.member.dto.MemberSignupRequest;
 import com.ssafy.home.member.dto.MemberUpdateRequest;
 import com.ssafy.home.member.dto.PasswordResetRequest;
-import com.ssafy.home.member.mapper.MemberInsertCommand;
-import com.ssafy.home.member.mapper.MemberMapper;
+import com.ssafy.home.member.persistence.MemberInsertCommand;
+import com.ssafy.home.member.persistence.MemberPersistencePort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +19,16 @@ import java.util.stream.Collectors;
 @Service
 public class MemberService {
 
-    private final MemberMapper memberMapper;
+    private final MemberPersistencePort memberPersistencePort;
     private final PasswordHasher passwordHasher;
     private final Set<String> adminEmails;
 
     public MemberService(
-            MemberMapper memberMapper,
+            MemberPersistencePort memberPersistencePort,
             PasswordHasher passwordHasher,
             @Value("${notice.admin-emails:}") String adminEmails
     ) {
-        this.memberMapper = memberMapper;
+        this.memberPersistencePort = memberPersistencePort;
         this.passwordHasher = passwordHasher;
         this.adminEmails = parseAdminEmails(adminEmails);
     }
@@ -40,19 +40,19 @@ public class MemberService {
         String name = required(request == null ? null : request.name(), "name is required.");
         String phone = trimToNull(request == null ? null : request.phone());
 
-        memberMapper.selectByEmail(email).ifPresent(member -> {
+        memberPersistencePort.selectByEmail(email).ifPresent(member -> {
             throw new MemberException(MemberErrorCode.DUPLICATE_EMAIL, "email already exists.");
         });
 
         MemberInsertCommand command = new MemberInsertCommand(email, passwordHasher.hash(password), name, phone);
-        memberMapper.insertMember(command);
+        memberPersistencePort.insertMember(command);
         return findResponseById(command.getMemberId());
     }
 
     public MemberResponse login(String email, String password) {
         String normalizedEmail = required(email, "email is required.");
         String rawPassword = required(password, "password is required.");
-        Member member = memberMapper.selectByEmail(normalizedEmail)
+        Member member = memberPersistencePort.selectByEmail(normalizedEmail)
                 .orElseThrow(() -> invalidCredentials());
         if (!passwordHasher.matches(rawPassword, member.passwordHash())) {
             throw invalidCredentials();
@@ -67,13 +67,13 @@ public class MemberService {
         String phone = trimToNull(request == null ? null : request.phone());
         String newPassword = required(request == null ? null : request.newPassword(), "newPassword is required.");
 
-        Member member = memberMapper.selectByEmail(email)
+        Member member = memberPersistencePort.selectByEmail(email)
                 .orElseThrow(() -> invalidCredentials());
         if (!member.name().equals(name) || !sameNullable(member.phone(), phone)) {
             throw invalidCredentials();
         }
 
-        int updated = memberMapper.updatePassword(member.memberId(), passwordHasher.hash(newPassword));
+        int updated = memberPersistencePort.updatePassword(member.memberId(), passwordHasher.hash(newPassword));
         if (updated == 0) {
             throw new MemberException(MemberErrorCode.NOT_FOUND, "member not found.");
         }
@@ -88,7 +88,7 @@ public class MemberService {
     public List<MemberResponse> searchMembers(Long currentMemberId, String keyword) {
         requireAdminMemberId(currentMemberId);
         String normalizedKeyword = required(keyword, "keyword is required.");
-        return memberMapper.searchMembers(normalizedKeyword).stream()
+        return memberPersistencePort.searchMembers(normalizedKeyword).stream()
                 .map(MemberResponse::from)
                 .toList();
     }
@@ -98,7 +98,7 @@ public class MemberService {
         requireMemberId(memberId);
         String name = required(request == null ? null : request.name(), "name is required.");
         String phone = trimToNull(request == null ? null : request.phone());
-        int updated = memberMapper.updateCurrentMember(memberId, name, phone);
+        int updated = memberPersistencePort.updateCurrentMember(memberId, name, phone);
         if (updated == 0) {
             throw new MemberException(MemberErrorCode.NOT_FOUND, "member not found.");
         }
@@ -108,14 +108,14 @@ public class MemberService {
     @Transactional
     public void deleteCurrentMember(Long memberId) {
         requireMemberId(memberId);
-        int deleted = memberMapper.deleteById(memberId);
+        int deleted = memberPersistencePort.deleteById(memberId);
         if (deleted == 0) {
             throw new MemberException(MemberErrorCode.NOT_FOUND, "member not found.");
         }
     }
 
     private MemberResponse findResponseById(Long memberId) {
-        Member member = memberMapper.selectById(memberId)
+        Member member = memberPersistencePort.selectById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND, "member not found."));
         return MemberResponse.from(member);
     }
@@ -137,7 +137,7 @@ public class MemberService {
         if (adminEmails.isEmpty()) {
             return false;
         }
-        return memberMapper.selectById(memberId)
+        return memberPersistencePort.selectById(memberId)
                 .map(Member::email)
                 .map(MemberService::normalizeEmail)
                 .filter(email -> !email.isBlank())

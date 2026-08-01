@@ -1,11 +1,13 @@
 package com.ssafy.home.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.house.service.HouseService;
 import com.ssafy.home.house.controller.HouseController;
 import com.ssafy.home.member.auth.AuthCookieService;
 import com.ssafy.home.member.auth.AuthenticatedMember;
 import com.ssafy.home.member.auth.JwtAuthenticationInterceptor;
+import com.ssafy.home.member.auth.CurrentMemberIdArgumentResolver;
 import com.ssafy.home.member.auth.JwtTokenPair;
 import com.ssafy.home.member.auth.JwtTokenService;
 import com.ssafy.home.member.auth.MemberAuthService;
@@ -16,6 +18,7 @@ import com.ssafy.home.member.dto.PasswordResetRequest;
 import com.ssafy.home.member.service.MemberErrorCode;
 import com.ssafy.home.member.service.MemberException;
 import com.ssafy.home.member.service.MemberService;
+import com.ssafy.home.member.service.MemberAccountService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,7 +49,7 @@ class MemberControllerTest {
     void signupSuccessAndDuplicateFailureUseApiResponse() throws Exception {
         MemberService service = mock(MemberService.class);
         when(service.signup(any(MemberSignupRequest.class))).thenReturn(response(1L, "user@example.com", "User"));
-        MockMvc mockMvc = standaloneSetup(controller(service, mock(MemberAuthService.class))).build();
+        MockMvc mockMvc = mockMvc(service, mock(MemberAuthService.class));
 
         mockMvc.perform(post("/api/members")
                         .contentType("application/json")
@@ -78,7 +81,7 @@ class MemberControllerTest {
         JwtTokenPair tokens = tokens();
         when(authService.login("user@example.com", "password"))
                 .thenReturn(new MemberAuthService.LoginResult(response(1L, "user@example.com", "User"), tokens));
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType("application/json")
@@ -99,7 +102,7 @@ class MemberControllerTest {
         MemberAuthService authService = mock(MemberAuthService.class);
         when(service.resetPassword(any(PasswordResetRequest.class)))
                 .thenReturn(response(1L, "user@example.com", "User"));
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(post("/api/auth/password-reset")
                         .contentType("application/json")
@@ -117,7 +120,7 @@ class MemberControllerTest {
         MemberService service = mock(MemberService.class);
         MemberAuthService authService = mock(MemberAuthService.class);
         when(authService.refresh("refresh-token")).thenReturn(tokens());
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(post("/api/auth/refresh")
                         .cookie(new Cookie(AuthCookieService.REFRESH_COOKIE, "refresh-token")))
@@ -142,7 +145,7 @@ class MemberControllerTest {
         when(service.findCurrentMember(1L)).thenReturn(response(1L, "user@example.com", "User"));
         when(service.updateCurrentMember(eq(1L), any(MemberUpdateRequest.class)))
                 .thenReturn(response(1L, "user@example.com", "Changed"));
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(get("/api/members/me")
                         .requestAttr(AuthenticatedMember.REQUEST_ATTRIBUTE, 1L))
@@ -173,7 +176,7 @@ class MemberControllerTest {
         MemberAuthService authService = mock(MemberAuthService.class);
         when(service.searchMembers(1L, "user"))
                 .thenReturn(List.of(response(1L, "user@example.com", "User")));
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(get("/api/members/search")
                         .requestAttr(AuthenticatedMember.REQUEST_ATTRIBUTE, 1L)
@@ -189,7 +192,7 @@ class MemberControllerTest {
         MemberAuthService authService = mock(MemberAuthService.class);
         when(service.searchMembers(1L, "user"))
                 .thenThrow(new MemberException(MemberErrorCode.FORBIDDEN, "admin permission is required."));
-        MockMvc mockMvc = standaloneSetup(controller(service, authService)).build();
+        MockMvc mockMvc = mockMvc(service, authService);
 
         mockMvc.perform(get("/api/members/search")
                         .requestAttr(AuthenticatedMember.REQUEST_ATTRIBUTE, 1L)
@@ -211,6 +214,8 @@ class MemberControllerTest {
         when(memberService.findCurrentMember(1L)).thenReturn(response(1L, "user@example.com", "User"));
         MockMvc mockMvc = standaloneSetup(controller(memberService, authService), new HouseController(houseService))
                 .addMappedInterceptors(new String[]{"/api/members/me"}, interceptor)
+                .setCustomArgumentResolvers(new CurrentMemberIdArgumentResolver(tokenService, cookieService))
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
         mockMvc.perform(get("/api/members/me"))
@@ -228,7 +233,16 @@ class MemberControllerTest {
     }
 
     private static MemberController controller(MemberService service, MemberAuthService authService) {
-        return new MemberController(service, authService, cookieService());
+        return new MemberController(service, authService, cookieService(), new MemberAccountService(service, authService));
+    }
+
+    private static MockMvc mockMvc(MemberService service, MemberAuthService authService) {
+        AuthCookieService cookieService = cookieService();
+        JwtTokenService tokenService = new JwtTokenService(SECRET, 900, 604800, new ObjectMapper());
+        return standaloneSetup(controller(service, authService))
+                .setCustomArgumentResolvers(new CurrentMemberIdArgumentResolver(tokenService, cookieService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     private static AuthCookieService cookieService() {

@@ -1,8 +1,8 @@
 package com.ssafy.home.publicdata.service;
 
 import com.ssafy.home.publicdata.dto.AptTradeApiItem;
-import com.ssafy.home.publicdata.mapper.HouseDealInsertCommand;
-import com.ssafy.home.publicdata.mapper.HouseUpsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseDealInsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseUpsertCommand;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

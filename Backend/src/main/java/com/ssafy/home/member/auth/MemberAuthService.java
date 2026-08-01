@@ -1,7 +1,7 @@
 package com.ssafy.home.member.auth;
 
 import com.ssafy.home.member.dto.MemberResponse;
-import com.ssafy.home.member.mapper.RefreshTokenMapper;
+import com.ssafy.home.member.persistence.RefreshTokenPersistencePort;
 import com.ssafy.home.member.service.MemberErrorCode;
 import com.ssafy.home.member.service.MemberException;
 import com.ssafy.home.member.service.MemberService;
@@ -16,23 +16,23 @@ public class MemberAuthService {
 
     private final MemberService memberService;
     private final JwtTokenService jwtTokenService;
-    private final RefreshTokenMapper refreshTokenMapper;
+    private final RefreshTokenPersistencePort refreshTokenPersistencePort;
 
     public MemberAuthService(
             MemberService memberService,
             JwtTokenService jwtTokenService,
-            RefreshTokenMapper refreshTokenMapper
+            RefreshTokenPersistencePort refreshTokenPersistencePort
     ) {
         this.memberService = memberService;
         this.jwtTokenService = jwtTokenService;
-        this.refreshTokenMapper = refreshTokenMapper;
+        this.refreshTokenPersistencePort = refreshTokenPersistencePort;
     }
 
     @Transactional
     public LoginResult login(String email, String password) {
         MemberResponse member = memberService.login(email, password);
         JwtTokenPair tokens = jwtTokenService.issue(member.memberId());
-        refreshTokenMapper.upsert(member.memberId(), TokenHash.sha256(tokens.refreshToken()),
+        refreshTokenPersistencePort.upsert(member.memberId(), TokenHash.sha256(tokens.refreshToken()),
                 LocalDateTime.ofInstant(tokens.refreshExpiresAt(), ZoneOffset.UTC));
         return new LoginResult(member, tokens);
     }
@@ -41,7 +41,7 @@ public class MemberAuthService {
     public JwtTokenPair refresh(String refreshToken) {
         JwtClaims claims = jwtTokenService.verify(refreshToken, JwtTokenType.REFRESH);
         JwtTokenPair newTokens = jwtTokenService.issue(claims.memberId());
-        int rotated = refreshTokenMapper.rotate(
+        int rotated = refreshTokenPersistencePort.rotate(
                 claims.memberId(),
                 TokenHash.sha256(refreshToken),
                 TokenHash.sha256(newTokens.refreshToken()),
@@ -56,13 +56,13 @@ public class MemberAuthService {
     @Transactional
     public void logout(String refreshToken) {
         if (refreshToken != null && !refreshToken.isBlank()) {
-            refreshTokenMapper.deleteByTokenHash(TokenHash.sha256(refreshToken));
+            refreshTokenPersistencePort.deleteByTokenHash(TokenHash.sha256(refreshToken));
         }
     }
 
     @Transactional
     public void revokeMember(Long memberId) {
-        refreshTokenMapper.deleteByMemberId(memberId);
+        refreshTokenPersistencePort.deleteByMemberId(memberId);
     }
 
     public record LoginResult(MemberResponse member, JwtTokenPair tokens) {
