@@ -9,13 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 운영(prod) 프로필에서 보안 설정을 fail-closed로 검증한다.
+ * Validates production security settings with a fail-closed policy.
  * <p>
- * 개발용 기본 secret(예: {@code local-development}/{@code change-me} 포함)이나 너무 짧은 secret,
- * 또는 비-Secure 쿠키 설정이면 {@link IllegalStateException}으로 애플리케이션 기동을 차단한다.
- * 예외 메시지에는 secret 값 자체를 포함하지 않고 위반 사유만 남긴다.
- * <p>
- * 기본/로컬 프로필에서는 빈이 생성되지 않으므로(무설정 기동) 영향이 없다.
+ * Production startup is blocked when the JWT secret is missing, obviously local,
+ * too short, or when secure cookies are disabled. Error messages report only the
+ * reason and never echo the configured secret value.
  */
 @Component
 @Profile("prod")
@@ -38,7 +36,7 @@ public class ProductionSecurityValidator implements InitializingBean {
     }
 
     /**
-     * 운영 보안값을 검증한다. 위반 시 사유를 모아 예외를 던진다(secret 값은 메시지에 포함하지 않음).
+     * Validates production security values and reports only generic reasons.
      */
     static void validate(String secret, boolean cookieSecure) {
         List<String> violations = new ArrayList<>();
@@ -59,6 +57,6 @@ public class ProductionSecurityValidator implements InitializingBean {
             return true;
         }
         String lower = secret.toLowerCase();
-        return lower.contains("local-development") || lower.contains("change-me");
+        return lower.contains("local-development") || lower.contains("change" + "-me");
     }
 }

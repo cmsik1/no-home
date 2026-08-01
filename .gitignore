@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+.monorepo-backup/
+
+Backend/target/
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.vite/
+
+**/.idea/
+**/*.iml
+**/*.log
+**/*.pid
+.DS_Store
+Thumbs.db

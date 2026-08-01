@@ -2,6 +2,8 @@ package com.ssafy.home.ai.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.home.ai.assistant.AssistantResponse;
+import com.ssafy.home.ai.assistant.AssistantRequest;
+import com.ssafy.home.ai.assistant.AiAssistantService;
 import com.ssafy.home.ai.limit.AiChatRateLimiter;
 import com.ssafy.home.ai.tool.HouseTools;
 import com.ssafy.home.ai.tool.PageActionTools;
@@ -39,11 +41,11 @@ class AiAssistantControllerTest {
     private final PageActionTools pageActionTools = mock(PageActionTools.class);
     private final AiChatRateLimiter rateLimiter = mock(AiChatRateLimiter.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final AiAssistantController controller =
-            new AiAssistantController(chatClient, houseTools, pageActionTools, rateLimiter, objectMapper, 500);
+    private final AiAssistantController controller = new AiAssistantController(
+            new AiAssistantService(chatClient, houseTools, pageActionTools, rateLimiter, objectMapper, 500));
 
-    private static AiAssistantController.AssistantRequest req(String message) {
-        return new AiAssistantController.AssistantRequest(message, List.of(), Map.of(), 1, 5, "c1");
+    private static AssistantRequest req(String message) {
+        return new AssistantRequest(message, List.of(), Map.of(), 1, 5, "c1");
     }
 
     @Test
@@ -75,12 +77,12 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsTextAnswerWhenModelAnswersDirectly() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         stubChatResponse(requestSpec, "마포구 평균은 13억원입니다.", "STOP");
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("마포구 시세 알려줘"), httpRequest);
+                controller.assistant(req("마포구 시세 알려줘"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         AssistantResponse data = response.getBody().data();
@@ -93,14 +95,14 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsCommandWhenActionToolReturnsDirect() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         String commandJson = "{\"action\":\"search\",\"filters\":{\"sigungu\":\"강남구\"},"
                 + "\"page\":null,\"direction\":null,\"itemIndex\":null,\"summary\":\"검색했어요\",\"clarify\":null}";
         stubChatResponse(requestSpec, commandJson, "returnDirect");
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("강남구로 검색해줘"), httpRequest);
+                controller.assistant(req("강남구로 검색해줘"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         AssistantResponse data = response.getBody().data();
@@ -112,12 +114,12 @@ class AiAssistantControllerTest {
 
     @Test
     void degradesToClarifyCommandWhenReturnDirectContentUnparseable() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         stubChatResponse(requestSpec, "this is not json", "returnDirect");
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("뭔가 조작"), httpRequest);
+                controller.assistant(req("뭔가 조작"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         AssistantResponse data = response.getBody().data();
@@ -127,8 +129,8 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsServiceUnavailableWhenChatClientMissing() {
-        AiAssistantController disabled =
-                new AiAssistantController(null, houseTools, pageActionTools, rateLimiter, objectMapper, 500);
+        AiAssistantController disabled = new AiAssistantController(
+                new AiAssistantService(null, houseTools, pageActionTools, rateLimiter, objectMapper, 500));
 
         ResponseEntity<ApiResponse<AssistantResponse>> response = disabled.assistant(req("질문"), null);
 
@@ -139,12 +141,12 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsAuthFailureWhenProviderRejectsKey() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         when(requestSpec.call()).thenThrow(new RuntimeException("401 Unauthorized: invalid_api_key"));
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("질문"), httpRequest);
+                controller.assistant(req("질문"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
         assertThat(response.getBody().message()).contains("인증").doesNotContain("invalid_api_key");
@@ -152,12 +154,12 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsServiceUnavailableWithoutLeakingModelFailure() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         when(requestSpec.call()).thenThrow(new IllegalStateException("provider token rejected"));
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("질문"), httpRequest);
+                controller.assistant(req("질문"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
         assertThat(response.getBody().message()).doesNotContain("provider token rejected");
@@ -165,12 +167,12 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsGatewayTimeoutForNestedTimeoutFailure() {
-        HttpServletRequest httpRequest = authenticatedRequest(1L);
+        grantRateLimit(1L);
         ChatClient.ChatClientRequestSpec requestSpec = requestSpec();
         when(requestSpec.call()).thenThrow(new CompletionException(new TimeoutException("internal timeout")));
 
         ResponseEntity<ApiResponse<AssistantResponse>> response =
-                controller.assistant(req("질문"), httpRequest);
+                controller.assistant(req("질문"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
         assertThat(response.getBody().message()).doesNotContain("internal timeout");
@@ -178,9 +180,7 @@ class AiAssistantControllerTest {
 
     @Test
     void rejectsRequestWithoutAuthenticatedMember() {
-        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-
-        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("질문"), httpRequest);
+        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("질문"), null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         verifyNoInteractions(chatClient, rateLimiter);
@@ -188,11 +188,9 @@ class AiAssistantControllerTest {
 
     @Test
     void returnsTooManyRequestsWithRetryAfterHeader() {
-        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-        when(httpRequest.getAttribute(AuthenticatedMember.REQUEST_ATTRIBUTE)).thenReturn(1L);
         when(rateLimiter.acquire(1L)).thenReturn(AiChatRateLimiter.Decision.rateLimited(37));
 
-        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("질문"), httpRequest);
+        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("질문"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
         assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("37");
@@ -201,11 +199,9 @@ class AiAssistantControllerTest {
 
     @Test
     void rejectsConcurrentRequestWithoutCallingModel() {
-        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-        when(httpRequest.getAttribute(AuthenticatedMember.REQUEST_ATTRIBUTE)).thenReturn(1L);
         when(rateLimiter.acquire(1L)).thenReturn(AiChatRateLimiter.Decision.concurrentRequest());
 
-        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("새 질문"), httpRequest);
+        ResponseEntity<ApiResponse<AssistantResponse>> response = controller.assistant(req("새 질문"), 1L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody().message()).contains("이미 답변을 생성하고 있습니다");
@@ -238,10 +234,7 @@ class AiAssistantControllerTest {
         when(metadata.getFinishReason()).thenReturn(finishReason);
     }
 
-    private HttpServletRequest authenticatedRequest(Long memberId) {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getAttribute(AuthenticatedMember.REQUEST_ATTRIBUTE)).thenReturn(memberId);
+    private void grantRateLimit(Long memberId) {
         when(rateLimiter.acquire(memberId)).thenReturn(AiChatRateLimiter.Decision.granted());
-        return request;
     }
 }

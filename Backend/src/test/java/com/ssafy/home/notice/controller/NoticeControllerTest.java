@@ -1,7 +1,9 @@
 package com.ssafy.home.notice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.member.auth.AuthCookieService;
+import com.ssafy.home.member.auth.CurrentMemberIdArgumentResolver;
 import com.ssafy.home.member.auth.JwtTokenService;
 import com.ssafy.home.notice.dto.NoticeRequest;
 import com.ssafy.home.notice.dto.NoticeResponse;
@@ -35,7 +37,7 @@ class NoticeControllerTest {
     void recentNoticesCanBeReadWithoutLogin() throws Exception {
         NoticeService service = mock(NoticeService.class);
         when(service.findRecent(5, null)).thenReturn(List.of(response(1L, 1L, "Notice", false)));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(get("/api/notices").param("limit", "5"))
                 .andExpect(status().isOk())
@@ -48,7 +50,7 @@ class NoticeControllerTest {
     void createNoticeUsesAccessCookieMember() throws Exception {
         NoticeService service = mock(NoticeService.class);
         when(service.create(eq(1L), any(NoticeRequest.class))).thenReturn(response(3L, 1L, "Created", true));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(post("/api/notices")
                         .cookie(accessCookie(1L))
@@ -67,7 +69,7 @@ class NoticeControllerTest {
         NoticeService service = mock(NoticeService.class);
         when(service.create(eq(null), any(NoticeRequest.class)))
                 .thenThrow(new NoticeException(NoticeErrorCode.UNAUTHENTICATED, "login required."));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(post("/api/notices")
                         .contentType("application/json")
@@ -83,7 +85,7 @@ class NoticeControllerTest {
         NoticeService service = mock(NoticeService.class);
         when(service.create(eq(2L), any(NoticeRequest.class)))
                 .thenThrow(new NoticeException(NoticeErrorCode.FORBIDDEN, "admin permission is required."));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(post("/api/notices")
                         .cookie(accessCookie(2L))
@@ -99,7 +101,7 @@ class NoticeControllerTest {
     void updateAndDeleteNoticeReturnCommonResponses() throws Exception {
         NoticeService service = mock(NoticeService.class);
         when(service.update(eq(1L), eq(3L), any(NoticeRequest.class))).thenReturn(response(3L, 1L, "After", true));
-        MockMvc mockMvc = standaloneSetup(controller(service)).build();
+        MockMvc mockMvc = mockMvc(service);
 
         mockMvc.perform(put("/api/notices/3")
                         .cookie(accessCookie(1L))
@@ -117,7 +119,14 @@ class NoticeControllerTest {
     }
 
     private static NoticeController controller(NoticeService service) {
-        return new NoticeController(service, cookieService(), tokenService());
+        return new NoticeController(service);
+    }
+
+    private static MockMvc mockMvc(NoticeService service) {
+        return standaloneSetup(controller(service))
+                .setCustomArgumentResolvers(new CurrentMemberIdArgumentResolver(tokenService(), cookieService()))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     private static AuthCookieService cookieService() {

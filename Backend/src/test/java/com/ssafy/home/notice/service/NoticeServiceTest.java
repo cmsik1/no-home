@@ -1,12 +1,12 @@
 package com.ssafy.home.notice.service;
 
 import com.ssafy.home.member.dto.Member;
-import com.ssafy.home.member.mapper.MemberMapper;
+import com.ssafy.home.member.persistence.MemberPersistencePort;
 import com.ssafy.home.notice.dto.Notice;
 import com.ssafy.home.notice.dto.NoticeRequest;
 import com.ssafy.home.notice.dto.NoticeResponse;
-import com.ssafy.home.notice.mapper.NoticeInsertCommand;
-import com.ssafy.home.notice.mapper.NoticeMapper;
+import com.ssafy.home.notice.persistence.NoticeInsertCommand;
+import com.ssafy.home.notice.persistence.NoticePersistencePort;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -25,8 +25,8 @@ class NoticeServiceTest {
 
     @Test
     void findRecentMarksNoticesEditableOnlyForAdmin() {
-        NoticeMapper noticeMapper = mock(NoticeMapper.class);
-        MemberMapper memberMapper = mock(MemberMapper.class);
+        NoticePersistencePort noticeMapper = mock(NoticePersistencePort.class);
+        MemberPersistencePort memberMapper = mock(MemberPersistencePort.class);
         when(noticeMapper.selectRecent(10)).thenReturn(List.of(
                 notice(1L, 1L, "Mine"),
                 notice(2L, 2L, "Other")
@@ -45,8 +45,8 @@ class NoticeServiceTest {
 
     @Test
     void createValidatesLoginAdminAndRequiredFields() {
-        NoticeMapper noticeMapper = mock(NoticeMapper.class);
-        MemberMapper memberMapper = mock(MemberMapper.class);
+        NoticePersistencePort noticeMapper = mock(NoticePersistencePort.class);
+        MemberPersistencePort memberMapper = mock(MemberPersistencePort.class);
         when(memberMapper.selectById(1L)).thenReturn(Optional.of(member(1L, "admin@example.com")));
         when(memberMapper.selectById(2L)).thenReturn(Optional.of(member(2L, "user@example.com")));
         NoticeService service = new NoticeService(noticeMapper, memberMapper, "admin@example.com");
@@ -67,8 +67,8 @@ class NoticeServiceTest {
 
     @Test
     void createInsertsAndReturnsCreatedNotice() {
-        NoticeMapper noticeMapper = mock(NoticeMapper.class);
-        MemberMapper memberMapper = mock(MemberMapper.class);
+        NoticePersistencePort noticeMapper = mock(NoticePersistencePort.class);
+        MemberPersistencePort memberMapper = mock(MemberPersistencePort.class);
         when(memberMapper.selectById(1L)).thenReturn(Optional.of(member(1L, "admin@example.com")));
         when(noticeMapper.insertNotice(any(NoticeInsertCommand.class))).thenAnswer(invocation -> {
             NoticeInsertCommand command = invocation.getArgument(0);
@@ -89,8 +89,8 @@ class NoticeServiceTest {
 
     @Test
     void updateAndDeleteRequireAdminNotice() {
-        NoticeMapper noticeMapper = mock(NoticeMapper.class);
-        MemberMapper memberMapper = mock(MemberMapper.class);
+        NoticePersistencePort noticeMapper = mock(NoticePersistencePort.class);
+        MemberPersistencePort memberMapper = mock(MemberPersistencePort.class);
         when(memberMapper.selectById(1L)).thenReturn(Optional.of(member(1L, "admin@example.com")));
         when(noticeMapper.updateNotice(eq(7L), eq("After"), eq("Body"))).thenReturn(1);
         when(noticeMapper.selectById(7L)).thenReturn(Optional.of(notice(7L, 1L, "After")));
@@ -106,8 +106,8 @@ class NoticeServiceTest {
 
     @Test
     void updateReportsNotFoundWhenMapperDoesNotChangeRows() {
-        NoticeMapper noticeMapper = mock(NoticeMapper.class);
-        MemberMapper memberMapper = mock(MemberMapper.class);
+        NoticePersistencePort noticeMapper = mock(NoticePersistencePort.class);
+        MemberPersistencePort memberMapper = mock(MemberPersistencePort.class);
         when(memberMapper.selectById(1L)).thenReturn(Optional.of(member(1L, "admin@example.com")));
         when(noticeMapper.updateNotice(eq(7L), eq("After"), eq("Body"))).thenReturn(0);
         NoticeService service = new NoticeService(noticeMapper, memberMapper, "admin@example.com");

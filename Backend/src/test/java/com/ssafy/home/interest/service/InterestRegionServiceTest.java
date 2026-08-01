@@ -4,7 +4,7 @@ import com.ssafy.home.common.region.SeoulLawdCodeResolver;
 import com.ssafy.home.interest.dto.InterestRegion;
 import com.ssafy.home.interest.dto.InterestRegionRequest;
 import com.ssafy.home.interest.dto.InterestRegionResponse;
-import com.ssafy.home.interest.mapper.InterestRegionMapper;
+import com.ssafy.home.interest.persistence.InterestRegionPersistencePort;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -63,7 +63,7 @@ class InterestRegionServiceTest {
         assertThat(mapper.interests).isEmpty();
     }
 
-    private static final class StubInterestRegionMapper implements InterestRegionMapper {
+    private static final class StubInterestRegionMapper implements InterestRegionPersistencePort {
         private long regionSeq = 1L;
         private long interestSeq = 1L;
         private final List<RegionRow> regions = new ArrayList<>();

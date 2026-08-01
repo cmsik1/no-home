@@ -1,7 +1,7 @@
 package com.ssafy.home.member.auth;
 
 import com.ssafy.home.member.dto.MemberResponse;
-import com.ssafy.home.member.mapper.RefreshTokenMapper;
+import com.ssafy.home.member.persistence.RefreshTokenPersistencePort;
 import com.ssafy.home.member.service.MemberException;
 import com.ssafy.home.member.service.MemberService;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class MemberAuthServiceTest {
     void loginStoresRefreshHashAndRefreshRotatesItOnce() {
         MemberService memberService = mock(MemberService.class);
         JwtTokenService tokenService = mock(JwtTokenService.class);
-        RefreshTokenMapper mapper = mock(RefreshTokenMapper.class);
+        RefreshTokenPersistencePort mapper = mock(RefreshTokenPersistencePort.class);
         MemberAuthService service = new MemberAuthService(memberService, tokenService, mapper);
         MemberResponse member = new MemberResponse(1L, "user@example.com", "User", null,
                 LocalDateTime.now(), LocalDateTime.now());
@@ -48,7 +48,7 @@ class MemberAuthServiceTest {
     void reusedRefreshTokenIsRejected() {
         MemberService memberService = mock(MemberService.class);
         JwtTokenService tokenService = mock(JwtTokenService.class);
-        RefreshTokenMapper mapper = mock(RefreshTokenMapper.class);
+        RefreshTokenPersistencePort mapper = mock(RefreshTokenPersistencePort.class);
         MemberAuthService service = new MemberAuthService(memberService, tokenService, mapper);
         JwtTokenPair next = pair("access-2", "refresh-2");
         when(tokenService.verify("used-refresh", JwtTokenType.REFRESH))
@@ -65,7 +65,7 @@ class MemberAuthServiceTest {
     void logoutAndMemberRevocationDeleteStoredRefreshTokens() {
         MemberService memberService = mock(MemberService.class);
         JwtTokenService tokenService = mock(JwtTokenService.class);
-        RefreshTokenMapper mapper = mock(RefreshTokenMapper.class);
+        RefreshTokenPersistencePort mapper = mock(RefreshTokenPersistencePort.class);
         MemberAuthService service = new MemberAuthService(memberService, tokenService, mapper);
 
         service.logout("refresh-token");

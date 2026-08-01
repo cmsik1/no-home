@@ -1,12 +1,12 @@
 package com.ssafy.home.notice.service;
 
 import com.ssafy.home.member.dto.Member;
-import com.ssafy.home.member.mapper.MemberMapper;
+import com.ssafy.home.member.persistence.MemberPersistencePort;
 import com.ssafy.home.notice.dto.Notice;
 import com.ssafy.home.notice.dto.NoticeRequest;
 import com.ssafy.home.notice.dto.NoticeResponse;
-import com.ssafy.home.notice.mapper.NoticeInsertCommand;
-import com.ssafy.home.notice.mapper.NoticeMapper;
+import com.ssafy.home.notice.persistence.NoticeInsertCommand;
+import com.ssafy.home.notice.persistence.NoticePersistencePort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,30 +23,30 @@ public class NoticeService {
     private static final int MAX_LIMIT = 50;
     private static final int MAX_TITLE_LENGTH = 200;
 
-    private final NoticeMapper noticeMapper;
-    private final MemberMapper memberMapper;
+    private final NoticePersistencePort noticePersistencePort;
+    private final MemberPersistencePort memberPersistencePort;
     private final Set<String> adminEmails;
 
     public NoticeService(
-            NoticeMapper noticeMapper,
-            MemberMapper memberMapper,
+            NoticePersistencePort noticePersistencePort,
+            MemberPersistencePort memberPersistencePort,
             @Value("${notice.admin-emails:}") String adminEmails
     ) {
-        this.noticeMapper = noticeMapper;
-        this.memberMapper = memberMapper;
+        this.noticePersistencePort = noticePersistencePort;
+        this.memberPersistencePort = memberPersistencePort;
         this.adminEmails = parseAdminEmails(adminEmails);
     }
 
     public List<NoticeResponse> findRecent(Integer limit, Long currentMemberId) {
         int normalizedLimit = normalizeLimit(limit);
         boolean editable = isAdmin(currentMemberId);
-        return noticeMapper.selectRecent(normalizedLimit).stream()
+        return noticePersistencePort.selectRecent(normalizedLimit).stream()
                 .map(notice -> NoticeResponse.from(notice, editable))
                 .toList();
     }
 
     public NoticeResponse findById(Long noticeId, Long currentMemberId) {
-        Notice notice = noticeMapper.selectById(requiredNoticeId(noticeId))
+        Notice notice = noticePersistencePort.selectById(requiredNoticeId(noticeId))
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOT_FOUND, "notice not found."));
         return NoticeResponse.from(notice, isAdmin(currentMemberId));
     }
@@ -57,7 +57,7 @@ public class NoticeService {
         String title = requiredTitle(request);
         String content = requiredContent(request);
         NoticeInsertCommand command = new NoticeInsertCommand(authorId, title, content);
-        noticeMapper.insertNotice(command);
+        noticePersistencePort.insertNotice(command);
         return findById(command.getNoticeId(), authorId);
     }
 
@@ -67,7 +67,7 @@ public class NoticeService {
         Long targetId = requiredNoticeId(noticeId);
         String title = requiredTitle(request);
         String content = requiredContent(request);
-        int updated = noticeMapper.updateNotice(targetId, title, content);
+        int updated = noticePersistencePort.updateNotice(targetId, title, content);
         if (updated == 0) {
             throw new NoticeException(NoticeErrorCode.NOT_FOUND, "notice not found.");
         }
@@ -78,7 +78,7 @@ public class NoticeService {
     public void delete(Long memberId, Long noticeId) {
         requiredAdminMemberId(memberId);
         Long targetId = requiredNoticeId(noticeId);
-        int deleted = noticeMapper.deleteNotice(targetId);
+        int deleted = noticePersistencePort.deleteNotice(targetId);
         if (deleted == 0) {
             throw new NoticeException(NoticeErrorCode.NOT_FOUND, "notice not found.");
         }
@@ -105,7 +105,7 @@ public class NoticeService {
         if (memberId == null || adminEmails.isEmpty()) {
             return false;
         }
-        return memberMapper.selectById(memberId)
+        return memberPersistencePort.selectById(memberId)
                 .map(Member::email)
                 .map(NoticeService::normalizeEmail)
                 .filter(email -> !email.isBlank())

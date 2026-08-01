@@ -9,7 +9,7 @@ import com.ssafy.home.house.dto.HouseSearchPageResponse;
 import com.ssafy.home.house.dto.HouseSearchResultResponse;
 import com.ssafy.home.house.dto.ImportBatchResponse;
 import com.ssafy.home.house.dto.RegionResponse;
-import com.ssafy.home.house.mapper.HouseMapper;
+import com.ssafy.home.house.persistence.HousePersistencePort;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
 import com.ssafy.home.publicdata.service.PublicDataImportService;
 import org.junit.jupiter.api.Test;
@@ -333,7 +333,7 @@ class HouseServiceTest {
                 "success", 10, 7, 2, null, null, null);
     }
 
-    private static class StubHouseMapper implements HouseMapper {
+    private static class StubHouseMapper implements HousePersistencePort {
         private String lastLawdCd;
         private String lastDealYmd;
         private HouseSearchCondition lastCondition;

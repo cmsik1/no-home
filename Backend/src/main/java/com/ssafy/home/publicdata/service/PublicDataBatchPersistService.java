@@ -2,17 +2,19 @@ package com.ssafy.home.publicdata.service;
 
 import com.ssafy.home.common.region.SeoulLawdCodeResolver;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
-import com.ssafy.home.publicdata.mapper.HouseDealInsertCommand;
-import com.ssafy.home.publicdata.mapper.HouseIdMapping;
-import com.ssafy.home.publicdata.mapper.HouseUpsertCommand;
-import com.ssafy.home.publicdata.mapper.PublicDataImportMapper;
-import com.ssafy.home.publicdata.mapper.RegionIdMapping;
-import com.ssafy.home.publicdata.mapper.RegionIdentity;
+import com.ssafy.home.publicdata.persistence.HouseDealInsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseIdMapping;
+import com.ssafy.home.publicdata.persistence.HouseUpsertCommand;
+import com.ssafy.home.publicdata.persistence.PublicDataImportPersistencePort;
+import com.ssafy.home.publicdata.persistence.RegionIdMapping;
+import com.ssafy.home.publicdata.persistence.RegionIdentity;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,11 +30,19 @@ public class PublicDataBatchPersistService {
     private static final Logger log = LoggerFactory.getLogger(PublicDataBatchPersistService.class);
     private static final int INSERT_CHUNK_SIZE = 500;
 
-    private final PublicDataImportMapper mapper;
+    private final PublicDataImportPersistencePort persistencePort;
+    private final TransactionTemplate transactionTemplate;
+    private final TransactionTemplate requiresNewTransactionTemplate;
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
-    public PublicDataBatchPersistService(PublicDataImportMapper mapper) {
-        this.mapper = mapper;
+    public PublicDataBatchPersistService(
+            PublicDataImportPersistencePort persistencePort,
+            PlatformTransactionManager transactionManager
+    ) {
+        this.persistencePort = persistencePort;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
+        this.requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     @PreDestroy
@@ -51,26 +61,47 @@ public class PublicDataBatchPersistService {
         });
     }
 
-    @Transactional
+    public boolean prepare(String sourceApi, String lawdCd, String dealYmd, String houseType, String dealType) {
+        if (persistencePort.selectSuccessBatchId(sourceApi, lawdCd, dealYmd, houseType, dealType).isPresent()) {
+            return false;
+        }
+        requiresNewTransactionTemplate.executeWithoutResult(status ->
+                persistencePort.upsertRequestedBatch(sourceApi, lawdCd, dealYmd, houseType, dealType));
+        return true;
+    }
+
+    public void recordFailure(
+            String sourceApi,
+            String lawdCd,
+            String dealYmd,
+            String houseType,
+            String dealType,
+            RuntimeException exception
+    ) {
+        requiresNewTransactionTemplate.executeWithoutResult(status ->
+                persistencePort.updateBatchFailed(sourceApi, lawdCd, dealYmd, houseType, dealType,
+                        exception.getMessage()));
+    }
+
     public PublicDataImportResult persist(PersistRequest request) {
-        if (mapper.selectSuccessBatchId(request.sourceApi(), request.lawdCd(), request.dealYmd(),
-                request.houseType(), request.batchDealType()).isPresent()) {
+        if (!prepare(request.sourceApi(), request.lawdCd(), request.dealYmd(),
+                request.houseType(), request.batchDealType())) {
             return new PublicDataImportResult(request.sourceApi(), request.lawdCd(), request.dealYmd(), "success",
                     0, 0, 0, true, "success batch already exists; skipped normal import");
         }
 
-        mapper.upsertRequestedBatch(request.sourceApi(), request.lawdCd(), request.dealYmd(),
-                request.houseType(), request.batchDealType());
         try {
-            PersistCounts counts = persistRows(request.rows());
-            mapper.updateBatchSuccess(request.sourceApi(), request.lawdCd(), request.dealYmd(),
-                    request.houseType(), request.batchDealType(), request.totalCount(),
-                    counts.importedCount(), counts.skippedCount());
-            return new PublicDataImportResult(request.sourceApi(), request.lawdCd(), request.dealYmd(), "success",
-                    request.totalCount(), counts.importedCount(), counts.skippedCount(), false, "import completed");
+            return transactionTemplate.execute(status -> {
+                PersistCounts counts = persistRows(request.rows());
+                persistencePort.updateBatchSuccess(request.sourceApi(), request.lawdCd(), request.dealYmd(),
+                        request.houseType(), request.batchDealType(), request.totalCount(),
+                        counts.importedCount(), counts.skippedCount());
+                return new PublicDataImportResult(request.sourceApi(), request.lawdCd(), request.dealYmd(), "success",
+                        request.totalCount(), counts.importedCount(), counts.skippedCount(), false, "import completed");
+            });
         } catch (RuntimeException exception) {
-            mapper.updateBatchFailed(request.sourceApi(), request.lawdCd(), request.dealYmd(),
-                    request.houseType(), request.batchDealType(), exception.getMessage());
+            recordFailure(request.sourceApi(), request.lawdCd(), request.dealYmd(), request.houseType(),
+                    request.batchDealType(), exception);
             throw exception;
         }
     }
@@ -82,24 +113,24 @@ public class PublicDataBatchPersistService {
 
         List<RegionIdentity> regions = dedupeRegions(rows);
         if (!regions.isEmpty()) {
-            mapper.upsertRegions(regions);
+            persistencePort.upsertRegions(regions);
         }
 
         Map<RegionKey, Long> regionIds = new LinkedHashMap<>();
-        for (RegionIdMapping mapping : mapper.selectRegionIds(regions)) {
+        for (RegionIdMapping mapping : persistencePort.selectRegionIds(regions)) {
             regionIds.put(new RegionKey(mapping.lawdCd(), mapping.umdNm()), mapping.regionId());
         }
 
         List<HouseUpsertCommand> houses = dedupeHouses(rows, regionIds);
         if (!houses.isEmpty()) {
             for (List<HouseUpsertCommand> chunk : chunks(houses)) {
-                mapper.upsertHouses(chunk);
+                persistencePort.upsertHouses(chunk);
             }
         }
 
         Map<HouseKey, Long> houseIds = new LinkedHashMap<>();
         for (List<HouseUpsertCommand> chunk : chunks(houses)) {
-            for (HouseIdMapping mapping : mapper.selectHouseIds(chunk)) {
+            for (HouseIdMapping mapping : persistencePort.selectHouseIds(chunk)) {
                 houseIds.put(new HouseKey(mapping.sggCd(), mapping.umdNm(), mapping.jibun(), mapping.aptNm(),
                         mapping.buildYear()), mapping.houseId());
             }
@@ -118,7 +149,7 @@ public class PublicDataBatchPersistService {
 
         int imported = 0;
         for (List<HouseDealInsertCommand> chunk : chunks(deals)) {
-            imported += mapper.insertHouseDealsIfAbsent(chunk);
+            imported += persistencePort.insertHouseDealsIfAbsent(chunk);
         }
         return new PersistCounts(imported, Math.max(0, rows.size() - imported));
     }

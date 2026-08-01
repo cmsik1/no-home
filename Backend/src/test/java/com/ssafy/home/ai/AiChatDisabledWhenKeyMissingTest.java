@@ -1,5 +1,6 @@
 package com.ssafy.home.ai;
 
+import com.ssafy.home.test.PostgresIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * (= /api/ai/assistant 는 503), 컨트롤러를 포함한 나머지 컨텍스트는 정상 로드된다.
  */
 @SpringBootTest(properties = {
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.datasource.url=jdbc:h2:mem:ai_disabled;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-        "spring.datasource.username=sa",
-        "spring.datasource.password=",
-        "spring.sql.init.mode=never",
         "spring.ai.openai.api-key="
 })
-class AiChatDisabledWhenKeyMissingTest {
+class AiChatDisabledWhenKeyMissingTest extends PostgresIntegrationTest {
 
     @Autowired
     private ApplicationContext context;

@@ -6,14 +6,12 @@ import com.ssafy.home.publicdata.client.PublicDataAptRentXmlParser;
 import com.ssafy.home.publicdata.dto.AptRentApiItem;
 import com.ssafy.home.publicdata.dto.AptRentApiResponse;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
-import com.ssafy.home.publicdata.mapper.HouseDealInsertCommand;
-import com.ssafy.home.publicdata.mapper.HouseUpsertCommand;
-import com.ssafy.home.publicdata.mapper.PublicDataImportMapper;
+import com.ssafy.home.publicdata.persistence.HouseDealInsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseUpsertCommand;
 import com.ssafy.home.publicdata.service.PublicDataBatchPersistService.PersistRequest;
 import com.ssafy.home.publicdata.service.PublicDataBatchPersistService.PersistRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,7 +26,6 @@ public class PublicDataAptRentImportService {
 
     private final PublicDataAptRentClient client;
     private final PublicDataAptRentXmlParser parser;
-    private final PublicDataImportMapper mapper;
     private final AptRentImportCommandFactory commandFactory;
     private final SeoulLawdCodeResolver seoulLawdCodeResolver;
     private final PublicDataBatchPersistService batchPersistService;
@@ -37,43 +34,28 @@ public class PublicDataAptRentImportService {
     public PublicDataAptRentImportService(
             PublicDataAptRentClient client,
             PublicDataAptRentXmlParser parser,
-            PublicDataImportMapper mapper,
             AptRentImportCommandFactory commandFactory,
             SeoulLawdCodeResolver seoulLawdCodeResolver,
             PublicDataBatchPersistService batchPersistService
     ) {
         this.client = client;
         this.parser = parser;
-        this.mapper = mapper;
         this.commandFactory = commandFactory;
         this.seoulLawdCodeResolver = seoulLawdCodeResolver;
         this.batchPersistService = batchPersistService;
     }
 
-    PublicDataAptRentImportService(
-            PublicDataAptRentClient client,
-            PublicDataAptRentXmlParser parser,
-            PublicDataImportMapper mapper,
-            AptRentImportCommandFactory commandFactory,
-            SeoulLawdCodeResolver seoulLawdCodeResolver
-    ) {
-        this(client, parser, mapper, commandFactory, seoulLawdCodeResolver, new PublicDataBatchPersistService(mapper));
-    }
-
-    @Transactional
     public PublicDataImportResult importAptRents(String lawdCd, String dealYmd) {
-        if (mapper.selectSuccessBatchId(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE).isPresent()) {
+        if (!batchPersistService.prepare(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE)) {
             return new PublicDataImportResult(SOURCE_API, lawdCd, dealYmd, "success", 0, 0, 0, true,
                     "success batch already exists; skipped normal import");
         }
-
-        mapper.upsertRequestedBatch(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE);
         try {
             ImportResult importResult = importAllPages(lawdCd, dealYmd);
             return batchPersistService.persist(new PersistRequest(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE,
                     importResult.totalCount, importResult.rows));
         } catch (RuntimeException exception) {
-            mapper.updateBatchFailed(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE, exception.getMessage());
+            batchPersistService.recordFailure(SOURCE_API, lawdCd, dealYmd, HOUSE_TYPE, DEAL_TYPE, exception);
             throw exception;
         }
     }

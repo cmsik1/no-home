@@ -3,8 +3,8 @@ package com.ssafy.home.publicdata.service;
 import com.ssafy.home.house.util.ApiRowHashGenerator;
 import com.ssafy.home.house.util.ApiRowHashInput;
 import com.ssafy.home.publicdata.dto.AptRentApiItem;
-import com.ssafy.home.publicdata.mapper.HouseDealInsertCommand;
-import com.ssafy.home.publicdata.mapper.HouseUpsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseDealInsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseUpsertCommand;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

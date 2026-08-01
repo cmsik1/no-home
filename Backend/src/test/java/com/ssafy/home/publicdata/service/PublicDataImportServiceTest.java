@@ -5,13 +5,15 @@ import com.ssafy.home.publicdata.client.PublicDataAptTradeClient;
 import com.ssafy.home.publicdata.client.PublicDataAptTradeXmlParser;
 import com.ssafy.home.publicdata.client.PublicDataApiKeyProvider;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
-import com.ssafy.home.publicdata.mapper.HouseDealInsertCommand;
-import com.ssafy.home.publicdata.mapper.HouseIdMapping;
-import com.ssafy.home.publicdata.mapper.HouseUpsertCommand;
-import com.ssafy.home.publicdata.mapper.PublicDataImportMapper;
-import com.ssafy.home.publicdata.mapper.RegionIdMapping;
-import com.ssafy.home.publicdata.mapper.RegionIdentity;
+import com.ssafy.home.publicdata.persistence.HouseDealInsertCommand;
+import com.ssafy.home.publicdata.persistence.HouseIdMapping;
+import com.ssafy.home.publicdata.persistence.HouseUpsertCommand;
+import com.ssafy.home.publicdata.persistence.PublicDataImportPersistencePort;
+import com.ssafy.home.publicdata.persistence.RegionIdMapping;
+import com.ssafy.home.publicdata.persistence.RegionIdentity;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,6 +24,9 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PublicDataImportServiceTest {
 
@@ -150,10 +155,16 @@ class PublicDataImportServiceTest {
         return new PublicDataImportService(
                 client,
                 new PublicDataAptTradeXmlParser(),
-                mapper,
                 new AptTradeImportCommandFactory(),
-                new SeoulLawdCodeResolver()
+                new SeoulLawdCodeResolver(),
+                new PublicDataBatchPersistService(mapper, transactionManager())
         );
+    }
+
+    private static PlatformTransactionManager transactionManager() {
+        PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
+        when(transactionManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+        return transactionManager;
     }
 
     private static String sampleXmlWithDuplicateRows() {
@@ -173,7 +184,7 @@ class PublicDataImportServiceTest {
                 """;
     }
 
-    private static class StubMapper implements PublicDataImportMapper {
+    private static class StubMapper implements PublicDataImportPersistencePort {
         private boolean successBatchExists;
         private int requestedBatchCount;
         private int insertDealAttempts;
