@@ -25,7 +25,7 @@ test("완성된 Atlas가 한국어 동적 학습 사이트로 렌더링된다", 
   assert.match(html, /직접 움직여 보세요/);
   assert.match(html, /초보자를 위한 인터랙티브 백엔드 학습 사이트/);
 
-  for (const sectionId of ["map", "lab", "api", "data", "runtime", "glossary"]) {
+  for (const sectionId of ["map", "lab", "api", "code-guide", "data", "runtime", "glossary"]) {
     assert.match(html, new RegExp(`id="${sectionId}"`));
   }
 
@@ -33,6 +33,8 @@ test("완성된 Atlas가 한국어 동적 학습 사이트로 렌더링된다", 
   assert.match(html, /type="range"/);
   assert.match(html, /aria-label="API 검색"/);
   assert.match(html, /25(?:<!-- -->)?개/);
+  assert.match(html, /HTTP (?:<!-- -->)?400/);
+  assert.match(html, /HouseController\.java/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
@@ -52,6 +54,8 @@ test("소스에 이동·조절·반응형·접근성 장치가 포함된다", as
   assert.equal((page.match(/\{ method: "(?:GET|POST|PUT|DELETE)"/g) ?? []).length, 25);
   assert.match(page, /\/api\/interest-regions\/\{interestRegionId\}/);
   assert.match(page, /\/api\/notices\/\{noticeId\}/);
+  assert.equal((page.match(/status: "(?:400|401|403|404|409|502|503|504)"/g) ?? []).length, 8);
+  assert.match(page, /GlobalExceptionHandler\.java/);
 
   assert.match(css, /@media \(max-width:/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);

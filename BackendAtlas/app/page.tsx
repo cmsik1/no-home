@@ -79,6 +79,26 @@ const glossary = [
   ["Hash", "긴 데이터를 짧고 일정한 지문으로 바꾸는 방법이에요."],
 ];
 
+const errorResponses = [
+  { status: "400", name: "잘못된 요청", when: "필수 값이 없거나 입력 규칙에 맞지 않을 때", code: "BAD_REQUEST" },
+  { status: "401", name: "로그인 필요", when: "로그인 정보가 없거나 이메일·비밀번호가 틀릴 때", code: "UNAUTHORIZED" },
+  { status: "403", name: "권한 부족", when: "일반 회원이 관리자 기능을 요청할 때", code: "FORBIDDEN" },
+  { status: "404", name: "찾을 수 없음", when: "회원·공지·관심 지역이 존재하지 않을 때", code: "NOT_FOUND" },
+  { status: "409", name: "이미 존재함", when: "이미 가입된 이메일로 회원가입할 때", code: "CONFLICT" },
+  { status: "502", name: "외부 서버 오류", when: "공공데이터 제공 기관이 정상 응답하지 않을 때", code: "BAD_GATEWAY" },
+  { status: "503", name: "외부 서비스 사용 불가", when: "공공데이터 키가 없거나 잘못됐거나 사용량을 넘었을 때", code: "SERVICE_UNAVAILABLE" },
+  { status: "504", name: "외부 서버 시간 초과", when: "공공데이터 응답을 제한 시간 안에 받지 못할 때", code: "GATEWAY_TIMEOUT" },
+];
+
+const guideFiles = [
+  { name: "HouseController.java", role: "검색 요청을 받고 HouseService에 전달해요.", path: "house/controller/HouseController.java" },
+  { name: "HouseService.java", role: "주택 검색 조건과 업무 처리 순서를 맡아요.", path: "house/service/HouseService.java" },
+  { name: "JpaHouseQueryAdapter.java", role: "검색 조건을 데이터베이스 조회로 바꿔요.", path: "house/persistence/JpaHouseQueryAdapter.java" },
+  { name: "PublicDataImportService.java", role: "공공데이터 수집과 저장 흐름을 지휘해요.", path: "publicdata/service/PublicDataImportService.java" },
+  { name: "PublicDataBatchPersistService.java", role: "두 작업 스레드로 데이터를 묶어서 저장해요.", path: "publicdata/service/PublicDataBatchPersistService.java" },
+  { name: "GlobalExceptionHandler.java", role: "예외를 알맞은 HTTP 오류 응답으로 바꿔요.", path: "common/response/GlobalExceptionHandler.java" },
+];
+
 const githubBase = "https://github.com/cmsik1/no-home/blob/main/Backend/src/main/java/com/ssafy/home/";
 
 export default function Home() {
@@ -96,6 +116,8 @@ export default function Home() {
   const [selectedTable, setSelectedTable] = useState("regions");
   const [flowMode, setFlowMode] = useState<"sync" | "async">("async");
   const [openTerm, setOpenTerm] = useState<number | null>(0);
+  const [selectedError, setSelectedError] = useState(0);
+  const [selectedFile, setSelectedFile] = useState(0);
   const labRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -268,8 +290,34 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="section code-guide-section" id="code-guide">
+        <SectionTitle number="04" label="오류와 코드 안내서" title="오류 번호와 주요 파일을 눌러서 살펴보세요" description="오류는 실패 이유를 알려주는 신호이고, 주요 파일은 그 신호와 기능을 실제로 처리하는 장소예요. 아래 내용은 GlobalExceptionHandler와 현재 소스에서 확인했습니다." />
+        <div className="code-guide-grid">
+          <article className="error-explorer">
+            <div className="guide-heading"><span>오류 응답</span><h3>숫자를 누르면 뜻이 열려요</h3></div>
+            <div className="error-tabs" aria-label="오류 상태 선택">
+              {errorResponses.map((error, index) => <button key={error.status} className={selectedError === index ? "active" : ""} onClick={() => setSelectedError(index)}>{error.status}</button>)}
+            </div>
+            <div className="error-card" aria-live="polite">
+              <span>HTTP {errorResponses[selectedError].status} · {errorResponses[selectedError].code}</span>
+              <h4>{errorResponses[selectedError].name}</h4>
+              <p>{errorResponses[selectedError].when}</p>
+              <pre>{`{\n  "success": false,\n  "message": "실패 이유",\n  "data": null\n}`}</pre>
+              <a href={`${githubBase}common/response/GlobalExceptionHandler.java`} target="_blank" rel="noreferrer">오류 처리 코드 열기 ↗</a>
+            </div>
+          </article>
+          <article className="file-explorer">
+            <div className="guide-heading"><span>주요 파일</span><h3>책임을 먼저 읽고 코드를 열어요</h3></div>
+            <div className="file-picker">
+              {guideFiles.map((file, index) => <button key={file.name} className={selectedFile === index ? "active" : ""} onClick={() => setSelectedFile(index)}><code>{file.name}</code><span>{index + 1}</span></button>)}
+            </div>
+            <div className="file-role" aria-live="polite"><span>이 파일이 하는 일</span><p>{guideFiles[selectedFile].role}</p><a href={`${githubBase}${guideFiles[selectedFile].path}`} target="_blank" rel="noreferrer">GitHub에서 실제 파일 열기 ↗</a></div>
+          </article>
+        </div>
+      </section>
+
       <section className="section data-section" id="data">
-        <SectionTitle number="04" label="데이터 지도" title="테이블을 눌러 연결 관계를 따라가 보세요" description="테이블은 데이터를 종류별로 담는 표예요. 예를 들어 houses는 아파트 정보, house_deals는 거래 기록을 보관합니다." />
+        <SectionTitle number="05" label="데이터 지도" title="테이블을 눌러 연결 관계를 따라가 보세요" description="테이블은 데이터를 종류별로 담는 표예요. 예를 들어 houses는 아파트 정보, house_deals는 거래 기록을 보관합니다." />
         <div className="data-map">
           <div className="table-constellation">
             <div className="connection-lines" aria-hidden="true"><i className="line l1" /><i className="line l2" /><i className="line l3" /><i className="line l4" /><i className="line l5" /></div>
@@ -284,7 +332,7 @@ export default function Home() {
       </section>
 
       <section className="section runtime-section" id="runtime">
-        <SectionTitle number="05" label="처리 방식 비교" title="동기와 비동기를 전환해서 속도 차이를 느껴보세요" description="동기는 일이 끝날 때까지 기다리는 방식이고, 비동기는 답을 먼저 준 뒤 남은 일을 뒤에서 처리하는 방식이에요." light />
+        <SectionTitle number="06" label="처리 방식 비교" title="동기와 비동기를 전환해서 속도 차이를 느껴보세요" description="동기는 일이 끝날 때까지 기다리는 방식이고, 비동기는 답을 먼저 준 뒤 남은 일을 뒤에서 처리하는 방식이에요." light />
         <div className="runtime-toggle"><button className={flowMode === "sync" ? "active" : ""} onClick={() => setFlowMode("sync")}>동기 처리</button><button className={flowMode === "async" ? "active" : ""} onClick={() => setFlowMode("async")}>비동기 처리</button></div>
         <div className={`runtime-demo ${flowMode}`}>
           <div className="runtime-person"><span>사용자</span><i>검색</i></div>
@@ -297,7 +345,7 @@ export default function Home() {
       </section>
 
       <section className="section glossary-section" id="glossary">
-        <SectionTitle number="06" label="쉬운 용어 사전" title="낯선 단어는 여기서 바로 풀어보세요" description="카드를 누르면 한 문장 설명이 열립니다. 외우기보다 위의 실험과 함께 다시 확인해 보세요." />
+        <SectionTitle number="07" label="쉬운 용어 사전" title="낯선 단어는 여기서 바로 풀어보세요" description="카드를 누르면 한 문장 설명이 열립니다. 외우기보다 위의 실험과 함께 다시 확인해 보세요." />
         <div className="glossary-grid">{glossary.map(([term, description], index) => <button key={term} className={openTerm === index ? "open" : ""} onClick={() => setOpenTerm(openTerm === index ? null : index)}><span><b>{term}</b><i>{openTerm === index ? "−" : "+"}</i></span>{openTerm === index && <p>{description}</p>}</button>)}</div>
       </section>
 
