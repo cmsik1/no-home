@@ -2,6 +2,8 @@
 
 NoHome is a full-stack housing search project with a Spring Boot backend, React/Vite frontend, PostgreSQL database, public data imports, Kakao Map integration, member authentication, notices, interest regions, and an AI assistant.
 
+Explore the backend by moving blocks, running the data pipeline, and opening API and database relationships in the [NoHome Backend Atlas](BackendAtlas/README.md).
+
 The refactored application follows a React `page -> hook -> service` flow and a Spring `controller -> application service -> persistence port -> JPA adapter` flow. Database changes are versioned with Flyway. See [the architecture notes](docs/refactoring-architecture.md) for the rationale and interview-ready explanation.
 
 This repository is managed as a monorepo:
