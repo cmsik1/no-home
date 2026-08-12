@@ -1,6 +1,6 @@
 # 프로젝트 개선 마일스톤
 
-## M1. 프로젝트 구조 정리
+## M1. 프로젝트 구조 정리 — 완료
 
 - `BackendAtlas` 삭제
 - `Artifact`와 `Backend/docs`를 루트 `docs`로 통합
