@@ -4,6 +4,7 @@
 
 ## 현재 문서
 
+- [프로젝트 실행 및 요청 처리 파이프라인](project-pipeline.md): 서버 기동, 사용자 요청, 데이터 변환과 백엔드 면접 대비 지식
 - [리팩터링 아키텍처](refactoring-architecture.md): 현재 Frontend와 Backend의 계층, 책임과 설계 근거
 - [AI 협업 개발 워크플로](ai-development-workflow.md): Jira, 작업 문서, Git을 연결하는 작업 방식
 - [프로젝트 개선 마일스톤](project-improvement-milestones.md): 구조 정리부터 전체 검증까지의 진행 단계
