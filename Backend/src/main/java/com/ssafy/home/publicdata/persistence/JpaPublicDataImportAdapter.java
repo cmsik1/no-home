@@ -13,6 +13,10 @@ import static com.ssafy.home.common.persistence.JpaRows.intValue;
 import static com.ssafy.home.common.persistence.JpaRows.longValue;
 import static com.ssafy.home.common.persistence.JpaRows.stringValue;
 
+/**
+ * 공공데이터 batch 저장 계약을 PostgreSQL native SQL로 구현한다.
+ * 대량 upsert/insert는 chunk 단위 command를 parameter binding하고 DB unique constraint로 중복을 최종 방어한다.
+ */
 @Repository
 public class JpaPublicDataImportAdapter implements PublicDataImportPersistencePort {
 

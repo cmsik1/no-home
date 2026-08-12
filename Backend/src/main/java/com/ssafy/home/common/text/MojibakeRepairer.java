@@ -6,6 +6,10 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 과거 수집 과정에서 UTF-8 bytes가 다른 문자셋으로 해석된 한글 문자열을 복구한다.
+ * 정상 문자열은 그대로 반환해 기존 데이터와 복구 대상 데이터를 같은 응답 경로에서 처리한다.
+ */
 public final class MojibakeRepairer {
 
     private MojibakeRepairer() {

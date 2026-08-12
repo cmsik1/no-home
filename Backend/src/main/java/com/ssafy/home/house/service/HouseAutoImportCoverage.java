@@ -27,6 +27,10 @@ import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.DEA
 import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.HOUSE_TYPE;
 import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.SOURCE_API;
 
+/**
+ * 검색 범위가 DB에 완전히 적재됐는지 판단하고 부족한 범위를 실시간 조회 또는 import 대상으로 만든다.
+ * 검색 service가 batch table과 외부 API의 세부 규칙을 직접 알지 않게 하는 coverage 정책 객체다.
+ */
 @Component
 final class HouseAutoImportCoverage {
 

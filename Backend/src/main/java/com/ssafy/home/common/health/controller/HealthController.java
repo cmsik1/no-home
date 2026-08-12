@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 애플리케이션과 DB 연결 상태를 외부 health check가 소비할 JSON 응답으로 노출한다.
+ */
 @RestController
 @RequestMapping("/api/health")
 public class HealthController {

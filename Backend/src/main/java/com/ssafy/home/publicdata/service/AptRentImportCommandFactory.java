@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/** 전월세 API item을 전세·월세로 분류하고 저장 가능한 주택·거래 command로 변환한다. */
 @Component
 public class AptRentImportCommandFactory {
 

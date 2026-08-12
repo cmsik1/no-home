@@ -10,6 +10,10 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * 회원별 시간 window 요청 수와 동시 AI 요청 하나를 메모리에서 제한한다.
+ * 단일 Backend process 기준 상태이므로 다중 instance 운영에서는 공유 저장소 기반 구현으로 교체해야 한다.
+ */
 @Component
 public class AiChatRateLimiter {
 

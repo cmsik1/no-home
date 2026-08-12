@@ -11,6 +11,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 보호 endpoint의 Controller 실행 전에 access cookie를 검증한다.
+ * 성공 시 member id를 request attribute로 넘기고 실패 시 공통 JSON 401 응답을 직접 작성해 요청을 중단한다.
+ */
 @Component
 public class JwtAuthenticationInterceptor implements HandlerInterceptor {
 

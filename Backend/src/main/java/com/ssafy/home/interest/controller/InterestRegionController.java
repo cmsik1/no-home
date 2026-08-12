@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 로그인 회원의 관심 지역 조회·등록·삭제 HTTP 요청을 service 유스케이스로 연결한다.
+ */
 @RestController
 @RequestMapping("/api/interest-regions")
 public class InterestRegionController {

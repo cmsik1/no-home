@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * 로그인, refresh token 회전과 로그아웃의 트랜잭션 경계다.
+ * access/refresh JWT를 발급하고 refresh token 원문 대신 SHA-256 hash와 만료 시각만 DB에 저장한다.
+ */
 @Service
 public class MemberAuthService {
 
@@ -28,6 +32,10 @@ public class MemberAuthService {
         this.refreshTokenPersistencePort = refreshTokenPersistencePort;
     }
 
+    /**
+     * 자격 증명 확인과 token 발급·저장을 한 유스케이스로 묶는다.
+     * 반환된 원문 token은 Controller가 cookie로 전달하고 DB에는 refresh token hash만 남는다.
+     */
     @Transactional
     public LoginResult login(String email, String password) {
         MemberResponse member = memberService.login(email, password);

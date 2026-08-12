@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/** 특정 법정동·거래월의 공공데이터 수집을 수동으로 시작하는 운영용 HTTP 경계다. */
 @RestController
 @RequestMapping("/api/public-data")
 public class PublicDataImportController {

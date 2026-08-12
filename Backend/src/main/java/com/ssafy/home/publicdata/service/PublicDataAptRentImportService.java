@@ -19,6 +19,10 @@ import static com.ssafy.home.publicdata.service.AptRentImportCommandFactory.DEAL
 import static com.ssafy.home.publicdata.service.AptRentImportCommandFactory.HOUSE_TYPE;
 import static com.ssafy.home.publicdata.service.AptRentImportCommandFactory.SOURCE_API;
 
+/**
+ * 아파트 전월세 공공 API를 끝 page까지 수집하고 응답 item을 주택·거래 저장 command로 변환한다.
+ * 매매 import와 같은 batch 저장 경계를 사용해 적재 상태와 중복 정책을 통일한다.
+ */
 @Service
 public class PublicDataAptRentImportService {
 

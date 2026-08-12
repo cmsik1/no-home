@@ -19,6 +19,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DB coverage가 없는 검색에서 공공데이터 row를 즉시 API 응답 DTO로 바꾸는 service다.
+ * 사용자는 적재 완료를 기다리지 않고 결과를 받고, 같은 row는 background batch로 DB에 저장된다.
+ */
 @Service
 public class PublicDataLiveSearchService {
 
@@ -58,6 +62,7 @@ public class PublicDataLiveSearchService {
         return LiveHouseSearchResultProcessor.priceRange(items, condition);
     }
 
+    /** 법정동·거래월 조합을 순회하며 거래 유형에 필요한 매매/전월세 API만 호출해 한 목록으로 합친다. */
     private List<LiveRow> fetchRows(List<String> lawdCds, List<String> dealYmds, String dealMode) {
         List<LiveRow> rows = new ArrayList<>();
         for (String lawdCd : lawdCds) {

@@ -5,6 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
+/**
+ * 외부 API 거래 row의 업무상 식별 필드를 정규화해 안정적인 SHA-256 hash를 만든다.
+ * DB unique key에 사용되어 같은 거래가 여러 수집 경로에서 들어와도 중복 insert를 막는다.
+ */
 public final class ApiRowHashGenerator {
 
     private ApiRowHashGenerator() {

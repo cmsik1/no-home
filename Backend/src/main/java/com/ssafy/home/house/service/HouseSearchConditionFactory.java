@@ -2,6 +2,10 @@ package com.ssafy.home.house.service;
 
 import com.ssafy.home.house.dto.HouseSearchCondition;
 
+/**
+ * 신뢰할 수 없는 HTTP 검색 값을 DB·외부 API가 공통으로 사용할 {@link HouseSearchCondition}으로 바꾼다.
+ * page/size 제한, 거래월·거래 유형·정렬 허용 목록과 가격 범위를 한곳에서 검증한다.
+ */
 final class HouseSearchConditionFactory {
 
     static final int DEFAULT_PAGE = 1;

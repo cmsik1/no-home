@@ -29,6 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 회원 계정과 로그인 session의 HTTP 경계다.
+ * 요청 DTO는 회원·인증 service로 전달하고, 발급된 token은 응답 body가 아니라 HttpOnly cookie로 기록한다.
+ */
 @RestController
 @RequestMapping("/api")
 public class MemberController {

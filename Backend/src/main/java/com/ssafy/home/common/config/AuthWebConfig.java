@@ -9,6 +9,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import java.util.List;
 
+/**
+ * cookie 기반 JWT 인증을 Spring MVC 요청 처리 과정에 연결한다.
+ * Interceptor가 검증한 회원 id는 {@code @CurrentMemberId} argument resolver를 통해 Controller로 전달된다.
+ */
 @Configuration
 public class AuthWebConfig implements WebMvcConfigurer {
 

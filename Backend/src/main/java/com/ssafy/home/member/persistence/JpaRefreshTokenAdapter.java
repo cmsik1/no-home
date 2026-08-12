@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 
+/**
+ * refresh token 원문이 아닌 hash를 저장하며, 이전 hash 조건을 포함한 update로 token 회전을 원자적으로 처리한다.
+ */
 @Repository
 public class JpaRefreshTokenAdapter implements RefreshTokenPersistencePort {
 

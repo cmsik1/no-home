@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/** region 조회와 interest relation 저장을 JPA repository 조합으로 구현하는 adapter다. */
 @Repository
 public class JpaInterestRegionAdapter implements InterestRegionPersistencePort {
 

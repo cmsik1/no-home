@@ -24,6 +24,10 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * 공공데이터 row를 지역→주택→거래 순서로 dedupe·upsert하고 import batch 상태를 기록한다.
+ * 실시간 검색의 background 저장과 수동 import가 같은 트랜잭션·중복 처리 경로를 공유한다.
+ */
 @Service
 public class PublicDataBatchPersistService {
 
@@ -50,6 +54,10 @@ public class PublicDataBatchPersistService {
         executor.shutdown();
     }
 
+    /**
+     * HTTP 응답과 DB 적재를 분리하기 위해 전용 executor에 저장 작업을 제출한다.
+     * 실패는 요청을 되돌릴 수 없으므로 안전한 식별 정보만 log에 남기고 다음 검색에서 재시도 가능하게 한다.
+     */
     public void persistAsync(PersistRequest request) {
         executor.execute(() -> {
             try {
@@ -83,6 +91,10 @@ public class PublicDataBatchPersistService {
                         exception.getMessage()));
     }
 
+    /**
+     * batch 준비 상태를 확인한 뒤 실제 row와 성공 상태를 한 트랜잭션으로 저장한다.
+     * 본 트랜잭션이 rollback되면 실패 상태는 별도의 REQUIRES_NEW 트랜잭션으로 기록된다.
+     */
     public PublicDataImportResult persist(PersistRequest request) {
         if (!prepare(request.sourceApi(), request.lawdCd(), request.dealYmd(),
                 request.houseType(), request.batchDealType())) {

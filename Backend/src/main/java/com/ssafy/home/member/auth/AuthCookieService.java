@@ -11,6 +11,10 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.Arrays;
 
+/**
+ * JWT 원문을 HttpOnly cookie로 쓰고 읽는 HTTP 전송 정책을 캡슐화한다.
+ * access cookie는 전체 API, refresh cookie는 인증 endpoint로 path를 제한한다.
+ */
 @Component
 public class AuthCookieService {
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/** 공지 entity를 application DTO로 변환하고 CRUD를 수행하는 JPA adapter다. */
 @Repository
 public class JpaNoticeAdapter implements NoticePersistencePort {
 

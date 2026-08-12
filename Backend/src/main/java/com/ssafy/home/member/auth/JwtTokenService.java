@@ -20,6 +20,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * HMAC-SHA256으로 access/refresh JWT를 발급하고 서명·type·만료를 검증한다.
+ * 인증 실패 원인을 외부에 세분화하지 않고 동일한 UNAUTHENTICATED 예외로 축약한다.
+ */
 @Component
 public class JwtTokenService {
 

@@ -6,6 +6,10 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * native query가 반환한 비정형 값을 DTO 필드 타입으로 안전하게 바꾸는 공통 변환기다.
+ * DB driver가 숫자·날짜를 다른 구체 타입으로 반환하더라도 row mapper가 같은 규칙을 사용하게 한다.
+ */
 public final class JpaRows {
 
     private JpaRows() {

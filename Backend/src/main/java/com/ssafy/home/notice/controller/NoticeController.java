@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 공지 목록·상세와 관리자 쓰기 요청을 {@link NoticeService}로 전달한다.
+ * 인증된 회원 id는 수정 가능 여부와 관리자 권한 판단에 사용된다.
+ */
 @RestController
 @RequestMapping("/api/notices")
 public class NoticeController {

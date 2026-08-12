@@ -22,6 +22,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * AI 입력 검증, 회원별 요청 제한, 대화 memory와 tool calling을 한 유스케이스로 조율한다.
+ * 모델 결과를 일반 답변 또는 Frontend가 실행할 구조화 {@link AgentCommand}로 정규화한다.
+ */
 @Service
 public class AiAssistantService {
 
@@ -73,6 +77,10 @@ public class AiAssistantService {
         this.maxMessageLength = maxMessageLength;
     }
 
+    /**
+     * 사용자 메시지와 현재 화면 상태를 모델에 전달한다. rate limiter 획득 후에는 성공·실패와 무관하게
+     * {@code finally}에서 점유를 해제해 한 회원의 후속 요청이 영구 차단되지 않게 한다.
+     */
     public AiAssistantResult assist(AssistantRequest request, Long memberId) {
         String message = request == null || request.message() == null ? null : request.message().trim();
         if (message == null || message.isBlank()) {

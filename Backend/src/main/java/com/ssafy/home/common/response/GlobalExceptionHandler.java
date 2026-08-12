@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * service 계층의 기능별 예외를 HTTP 상태와 공통 {@link ApiResponse} 실패 형식으로 변환한다.
+ * Controller마다 같은 try/catch와 상태 변환을 반복하지 않게 하는 HTTP 경계다.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

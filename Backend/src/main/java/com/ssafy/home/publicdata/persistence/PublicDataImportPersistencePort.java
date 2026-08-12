@@ -3,6 +3,7 @@ package com.ssafy.home.publicdata.persistence;
 import java.util.List;
 import java.util.Optional;
 
+/** batch 상태, 지역·주택 upsert와 거래 중복 insert에 필요한 영속성 계약을 묶는다. */
 public interface PublicDataImportPersistencePort {
     Optional<Long> selectSuccessBatchId(String sourceApi, String lawdCd, String dealYmd, String houseType, String dealType);
     void upsertRequestedBatch(String sourceApi, String lawdCd, String dealYmd, String houseType, String dealType);

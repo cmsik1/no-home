@@ -5,6 +5,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+/** 전월세 공공 API URL과 query parameter를 구성하고 원본 XML 응답을 가져오는 HTTP client다. */
 @Component
 public class PublicDataAptRentClient {
 

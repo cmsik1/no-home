@@ -15,6 +15,10 @@ import java.util.function.Function;
 import static com.ssafy.home.publicdata.service.AptRentImportCommandFactory.RENT_TYPE_JEONSE;
 import static com.ssafy.home.publicdata.service.AptRentImportCommandFactory.RENT_TYPE_MONTHLY;
 
+/**
+ * 외부 API에서 방금 받은 row에 DB 검색과 같은 필터·정렬·pagination 규칙을 적용한다.
+ * 실시간 경로와 DB 경로가 사용자에게 동일한 응답 계약을 제공하게 한다.
+ */
 final class LiveHouseSearchResultProcessor {
 
     private LiveHouseSearchResultProcessor() {

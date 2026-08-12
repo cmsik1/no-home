@@ -9,6 +9,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+/**
+ * {@link CurrentMemberId}가 붙은 Controller parameter를 인증된 회원 id로 변환한다.
+ * Interceptor가 넣은 request attribute를 우선 사용하고, 선택 인증 endpoint에서는 cookie 검증을 fallback으로 사용한다.
+ */
 @Component
 public class CurrentMemberIdArgumentResolver implements HandlerMethodArgumentResolver {
 

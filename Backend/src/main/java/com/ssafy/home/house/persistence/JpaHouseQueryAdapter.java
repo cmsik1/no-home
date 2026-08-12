@@ -17,6 +17,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.ssafy.home.common.persistence.JpaRows.intValue;
+/**
+ * {@link HousePersistencePort}를 JPA {@link EntityManager}와 native SQL로 구현한다.
+ * query 결과의 {@code Object[]} row는 {@link HouseRowMappers}에서 API용 DTO로 변환된다.
+ */
 @Repository
 public class JpaHouseQueryAdapter implements HousePersistencePort {
 

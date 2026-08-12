@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/** 매매 API item의 문자열·금액·날짜를 정규화해 주택 upsert와 거래 insert command로 변환한다. */
 @Component
 public class AptTradeImportCommandFactory {
 

@@ -17,7 +17,7 @@ import java.util.Map;
  * 키가 비어 있으면 Spring AI OpenAI 자동구성이 "OpenAI API key must be set"으로 컨텍스트
  * 기동을 실패시킨다. 이때 {@code spring.ai.model.chat=none}으로 chat 모델 자동구성을 끄고
  * {@code app.ai.chat.available=false} 게이트를 내려, 부동산 등 핵심 기능은 정상 기동하고
- * {@code /api/ai/chat}만 비활성(503)이 되도록 한다. 키가 있으면 아무 것도 하지 않는다.
+ * {@code /api/ai/assistant}만 비활성(503)이 되도록 한다. 키가 있으면 아무 것도 하지 않는다.
  */
 public class AiKeyEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -49,6 +49,6 @@ public class AiKeyEnvironmentPostProcessor implements EnvironmentPostProcessor, 
         environment.getPropertySources()
                 .addFirst(new MapPropertySource("aiChatDisabledWhenKeyMissing", overrides));
         log.warn("SSAFY_GMS_API_KEY (spring.ai.openai.api-key) 미설정 — AI 챗봇을 비활성화하고 기동합니다. "
-                + "핵심 기능은 정상이며 /api/ai/chat 은 503을 반환합니다.");
+                + "핵심 기능은 정상이며 /api/ai/assistant 는 503을 반환합니다.");
     }
 }

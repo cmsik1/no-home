@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 회원별 관심 지역 규칙과 트랜잭션을 담당한다.
+ * 외부 요청의 법정동 코드를 실제 region id로 해석한 뒤 회원-지역 관계를 persistence port에 저장한다.
+ */
 @Service
 @Transactional(readOnly = true)
 public class InterestRegionService {

@@ -26,6 +26,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 주택 검색 유스케이스를 조율하는 application service다.
+ * HTTP 요청을 검증된 검색 조건으로 바꾸고, data coverage에 따라 실시간 공공데이터 또는 DB 조회를 선택한 뒤
+ * page·가격 범위·import metadata가 포함된 응답을 만든다.
+ */
 @Service
 public class HouseService {
 
@@ -91,6 +96,10 @@ public class HouseService {
         return housePersistencePort.selectHouseDeals(lawdCd, dealYmd);
     }
 
+    /**
+     * Controller에서 binding한 검색 요청을 최종 실행 메서드에 전달한다. 최종 실행 경로는 coverage가 부족하면
+     * 실시간 공공데이터를, 이미 적재된 범위면 persistence port를 사용하고 두 결과를 같은 응답 DTO로 합친다.
+     */
     public HouseSearchPageResponse searchHouseDeals(HouseSearchRequest request) {
         return searchHouseDeals(
                 request.lawdCd(), request.sido(), request.sigungu(), request.umdNm(), request.aptName(),

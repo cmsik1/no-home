@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 주택·지역 조회 HTTP 입력을 DTO로 binding하고 {@link HouseService} 결과를 공통 API 응답으로 감싼다.
+ * 검색 조건의 정규화, 외부 데이터 보완과 DB 조회 결정은 service 계층에 위임한다.
+ */
 @RestController
 @RequestMapping("/api")
 public class HouseController {

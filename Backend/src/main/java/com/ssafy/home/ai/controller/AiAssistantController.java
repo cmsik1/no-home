@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 통합 AI 요청의 HTTP 경계다. service 결과 상태를 HTTP status와 공통 API 응답으로 바꾸고
+ * rate limit 거절에는 클라이언트 재시도 시점을 {@code Retry-After} header로 전달한다.
+ */
 @RestController
 @RequestMapping("/api/ai")
 public class AiAssistantController {

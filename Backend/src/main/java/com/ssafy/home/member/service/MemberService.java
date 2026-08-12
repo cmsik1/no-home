@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 회원 가입·조회·수정과 관리자 검색 규칙을 담당한다.
+ * 비밀번호 원문은 {@link PasswordHasher}에서 hash/검증하고 persistence port에는 저장 가능한 command만 전달한다.
+ */
 @Service
 public class MemberService {
 

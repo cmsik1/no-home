@@ -5,6 +5,10 @@ import com.ssafy.home.house.dto.RegionResponse;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DB에 지역 row가 아직 없어도 검색 form을 구성할 수 있도록 서울 법정동 기본 목록을 제공한다.
+ * DB 조회 결과와 합쳐지므로 영속 데이터의 대체물이 아니라 초기 탐색용 fallback이다.
+ */
 public final class SeoulLegalDongCatalog {
 
     private static final Map<String, List<String>> DONGS_BY_LAWD_CD = Map.ofEntries(

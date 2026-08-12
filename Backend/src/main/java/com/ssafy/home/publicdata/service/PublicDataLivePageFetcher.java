@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 실시간 검색에 필요한 공공 API page를 total count까지 수집한다.
+ * client의 XML 문자열을 parser 응답으로 바꾸고 provider result code를 application 예외로 변환한다.
+ */
 @Component
 public class PublicDataLivePageFetcher {
 

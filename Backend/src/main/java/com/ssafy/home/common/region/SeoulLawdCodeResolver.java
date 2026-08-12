@@ -7,6 +7,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 사용자에게 보이는 서울 자치구 이름과 공공데이터 요청에 필요한 5자리 법정동 코드를 상호 변환한다.
+ * Frontend 값, DB 검색 조건과 외부 API parameter가 같은 지역을 가리키도록 하는 경계 객체다.
+ */
 @Component
 public class SeoulLawdCodeResolver {
 

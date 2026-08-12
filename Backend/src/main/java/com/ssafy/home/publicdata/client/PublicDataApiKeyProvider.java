@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+/** API별 환경 변수 key를 읽고 누락 시 외부 호출 전에 명확한 application 예외를 발생시킨다. */
 @Component
 public class PublicDataApiKeyProvider {
 

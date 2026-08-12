@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/** 전월세 공공 API XML을 result metadata와 typed item 목록으로 변환한다. */
 @Component
 public class PublicDataAptRentXmlParser {
 

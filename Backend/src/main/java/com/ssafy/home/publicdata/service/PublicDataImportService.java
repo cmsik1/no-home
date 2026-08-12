@@ -19,6 +19,10 @@ import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.DEA
 import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.HOUSE_TYPE;
 import static com.ssafy.home.publicdata.service.AptTradeImportCommandFactory.SOURCE_API;
 
+/**
+ * 아파트 매매 공공 API의 모든 page를 수집·검증하고 저장용 command 묶음으로 변환한다.
+ * batch 중복 확인과 성공·실패 기록은 {@link PublicDataBatchPersistService}에 위임한다.
+ */
 @Service
 public class PublicDataImportService {
 

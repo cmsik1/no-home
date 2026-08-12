@@ -3,6 +3,7 @@ package com.ssafy.home.publicdata.service;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
 import org.springframework.stereotype.Service;
 
+/** 거래 유형에 따라 매매·전월세 import service를 선택하고 {@code all} 요청의 실행 순서를 조율한다. */
 @Service
 public class PublicDataImportFacade {
 

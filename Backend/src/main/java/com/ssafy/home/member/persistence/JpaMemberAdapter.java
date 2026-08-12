@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/** Member entity와 application DTO/command 사이를 변환하는 JPA 영속성 adapter다. */
 @Repository
 public class JpaMemberAdapter implements MemberPersistencePort {
 

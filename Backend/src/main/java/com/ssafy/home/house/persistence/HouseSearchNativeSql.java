@@ -5,6 +5,10 @@ import com.ssafy.home.house.dto.HouseSearchCondition;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * 검증된 검색 조건으로 WHERE·ORDER BY·pagination SQL과 named parameter를 만든다.
+ * 사용자 값은 SQL 문자열에 직접 붙이지 않고, 정렬은 서버가 허용한 고정 조각만 선택한다.
+ */
 final class HouseSearchNativeSql {
 
     private HouseSearchNativeSql() {

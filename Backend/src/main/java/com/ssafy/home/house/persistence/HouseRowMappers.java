@@ -13,6 +13,10 @@ import static com.ssafy.home.common.persistence.JpaRows.intValue;
 import static com.ssafy.home.common.persistence.JpaRows.longValue;
 import static com.ssafy.home.common.persistence.JpaRows.stringValue;
 
+/**
+ * native query의 열 순서를 주택·거래·검색 응답 record에 매핑한다.
+ * SQL projection이 바뀌면 이 변환과 DTO를 함께 검토해야 한다.
+ */
 final class HouseRowMappers {
 
     private HouseRowMappers() {

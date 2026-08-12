@@ -5,6 +5,7 @@ import com.ssafy.home.member.dto.Member;
 import java.util.List;
 import java.util.Optional;
 
+/** 회원 service가 사용하는 조회·쓰기 계약으로, JPA repository와 entity를 application 계층에서 숨긴다. */
 public interface MemberPersistencePort {
 
     int insertMember(MemberInsertCommand command);

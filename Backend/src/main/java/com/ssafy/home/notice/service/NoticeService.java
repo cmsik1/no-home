@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 공지 조회 응답을 만들고 생성·수정·삭제의 관리자 정책과 트랜잭션을 담당한다.
+ * 관리자 여부는 설정된 email 목록과 현재 회원을 대조해 판단한다.
+ */
 @Service
 public class NoticeService {
 
