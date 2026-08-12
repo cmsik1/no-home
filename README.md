@@ -8,10 +8,12 @@ This repository is managed as a monorepo:
 
 ```text
 NoHome/
-  Artifact/   project documents, diagrams, and presentation materials
   Backend/    Spring Boot API server
   Frontend/   React/Vite client
+  docs/       current guides, work records, and archived project materials
 ```
+
+Start with [the documentation index](docs/README.md) to distinguish current guides from historical records.
 
 ## Local Setup
 
@@ -97,6 +99,6 @@ Flyway applies `Backend/src/main/resources/db/migration/V1__initial_schema.sql` 
 
 ## Git Layout
 
-The root folder is the only Git repository. `Artifact`, `Backend`, and `Frontend` are regular subdirectories, so one root-level Git command can inspect or commit changes across documents, server code, and client code.
+The root folder is the only Git repository. `Backend`, `Frontend`, and `docs` are regular subdirectories, so one root-level Git command can inspect or commit changes across documents, server code, and client code.
 
 Original repository bundles are kept locally under `.monorepo-backup/` for recovery and are ignored by Git.
