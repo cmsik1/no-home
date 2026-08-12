@@ -1,7 +1,7 @@
 import {
   AUTO_IMPORT_REQUEST_TIMEOUT_MS,
   SEARCH_REQUEST_TIMEOUT_MS,
-} from '../config/appConfig'
+} from '../config/appConfig.js'
 
 export function houseRequestTimeoutMs(fields = {}) {
   return fields.autoImport === 'true' ? AUTO_IMPORT_REQUEST_TIMEOUT_MS : SEARCH_REQUEST_TIMEOUT_MS

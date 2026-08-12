@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "test": "npm run test:unit && npm run test:component",
-    "test:unit": "node --test src/houseSearchParams.test.js src/agentMapping.test.js src/utils/chatPanel.test.js src/utils/houseSearchViewModel.test.js src/services/agentClient.test.js src/services/agentActions.test.js",
+    "test:unit": "node --test src/houseSearchParams.test.js src/agentMapping.test.js src/utils/chatPanel.test.js src/utils/houseSearchViewModel.test.js src/services/agentClient.test.js src/services/agentActions.test.js src/services/houseService.test.js",
     "test:component": "vitest run",
     "test:auto-import": "node --test src/houseSearchParams.test.js",
     "test:widget": "node --test src/utils/chatPanel.test.js",

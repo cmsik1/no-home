@@ -1,31 +1,32 @@
 import {
   buildHousePriceRangeRequests,
   buildHouseSearchRequests,
-} from '../houseSearchParams'
-import { SEARCH_ALL_FETCH_SIZE } from '../config/appConfig'
-import { fetchWithTimeout, houseRequestTimeoutMs } from './apiClient'
+} from '../houseSearchParams.js'
+import { SEARCH_ALL_FETCH_SIZE } from '../config/appConfig.js'
+import { fetchWithTimeout, houseRequestTimeoutMs } from './apiClient.js'
 
-/** 직렬화된 검색 필드를 query string으로 보내고 Backend 응답의 data를 검색 payload로 꺼낸다. */
-export async function fetchHouseSearch(fields) {
+function buildQueryString(fields) {
   const params = new URLSearchParams()
   Object.entries(fields).forEach(([key, value]) => {
     if (value) params.set(key, value)
   })
-  const response = await fetchWithTimeout(`/api/houses/search${params.toString() ? `?${params}` : ''}`, {}, houseRequestTimeoutMs(fields))
+  return params.toString() ? `?${params}` : ''
+}
+
+async function fetchHousePayload(path, fields, failureLabel) {
+  const response = await fetchWithTimeout(`${path}${buildQueryString(fields)}`, {}, houseRequestTimeoutMs(fields))
   const body = await response.json().catch(() => null)
-  if (!response.ok || body?.success === false) throw new Error(body?.message || `검색 요청에 실패했습니다 (${response.status})`)
+  if (!response.ok || body?.success === false) throw new Error(body?.message || `${failureLabel} (${response.status})`)
   return body?.data ?? body ?? {}
 }
 
-export async function fetchHousePriceRange(fields) {
-  const params = new URLSearchParams()
-  Object.entries(fields).forEach(([key, value]) => {
-    if (value) params.set(key, value)
-  })
-  const response = await fetchWithTimeout(`/api/houses/price-range${params.toString() ? `?${params}` : ''}`, {}, houseRequestTimeoutMs(fields))
-  const body = await response.json().catch(() => null)
-  if (!response.ok || body?.success === false) throw new Error(body?.message || `가격 범위 요청에 실패했습니다 (${response.status})`)
-  return body?.data ?? body ?? {}
+/** 직렬화된 검색 필드를 query string으로 보내고 Backend 응답의 data를 검색 payload로 꺼낸다. */
+export function fetchHouseSearch(fields) {
+  return fetchHousePayload('/api/houses/search', fields, '검색 요청에 실패했습니다')
+}
+
+export function fetchHousePriceRange(fields) {
+  return fetchHousePayload('/api/houses/price-range', fields, '가격 범위 요청에 실패했습니다')
 }
 
 export async function fetchPagedHouseSearchResults(searchFilters, { page, size }) {
