@@ -1,5 +1,6 @@
 import { requestJson } from './apiClient'
 
+/** 회원·인증 화면이 endpoint 문자열이나 공통 응답 형식을 알지 않도록 API 호출을 한곳에 모은다. */
 export const memberService = {
   getCurrentMember() {
     return requestJson('/api/members/me')

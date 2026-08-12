@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { requestJson } from '../services/apiClient'
 import { fieldText } from '../utils/houseDisplay'
 
+/** 공지 목록과 작성·수정·삭제 폼을 관리하며 변경 성공 후 서버 목록을 다시 조회해 동기화한다. */
 export function useNotices({ isNoticeAdmin }) {
   const [notices, setNotices] = useState([])
   const [noticeLoading, setNoticeLoading] = useState(false)

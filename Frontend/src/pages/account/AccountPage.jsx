@@ -4,6 +4,7 @@ import { PasswordResetForm } from './components/PasswordResetForm.jsx'
 import { ProfilePanel } from './components/ProfilePanel.jsx'
 import { SignupForm } from './components/SignupForm.jsx'
 
+/** 현재 회원 유무와 accountMode에 따라 가입·로그인·재설정·프로필 흐름 중 하나를 표시한다. */
 export function AccountPage(props) {
   const {
     member, accountMode, setAccountMode, memberLoading, memberMessage, memberError,

@@ -1,3 +1,7 @@
+/**
+ * 큰 controller 객체를 각 페이지가 실제로 소비하는 props 계약으로 투영한다.
+ * 페이지 컴포넌트가 hook 구조를 알지 않게 해 렌더링과 상태 조율의 경계를 유지한다.
+ */
 export function buildSearchPageProps(controller) {
   const { search, map, memberAccount, interests, seoulDistricts, dealModeOptions, mapStatusLabel } = controller
   return {

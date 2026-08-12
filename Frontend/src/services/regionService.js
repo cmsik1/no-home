@@ -2,6 +2,10 @@ import { REGION_REQUEST_TIMEOUT_MS } from '../config/appConfig'
 import { fetchWithTimeout } from './apiClient'
 import { fieldText } from '../utils/houseDisplay'
 
+/**
+ * 행정구역 API 결과의 깨진 표시 문자열을 보정하고 같은 label을 제거한 정렬 선택지로 변환한다.
+ * value에는 서버가 이해하는 원문 동 이름을 유지해 후속 검색 계약을 보존한다.
+ */
 export async function fetchLegalDongs(lawdCd) {
   if (!lawdCd) return []
   const response = await fetchWithTimeout(`/api/regions?lawdCd=${encodeURIComponent(lawdCd)}`, {}, REGION_REQUEST_TIMEOUT_MS)

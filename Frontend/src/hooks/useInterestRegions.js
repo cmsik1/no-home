@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createInterestRegion, fetchInterestRegions, removeInterestRegion } from '../services/interestRegionService'
 import { fieldText } from '../utils/houseDisplay'
 
+/**
+ * 로그인 회원의 관심지역 목록을 API와 동기화한다. 저장된 지역을 적용할 때 검색 필터와
+ * 법정동 목록을 함께 교체하고 진행 중인 검색을 취소해 서로 다른 지역 상태가 섞이지 않게 한다.
+ */
 export function useInterestRegions({ member, selectedLawdCd, filters, updateFilters, loadLegalDongs, cancelSearch }) {
   const [interestRegions, setInterestRegions] = useState([])
   const [interestRegionLoading, setInterestRegionLoading] = useState(false)

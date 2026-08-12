@@ -3,6 +3,10 @@ import { applyAgentFilters, isSeoul, seoulLawdCodes } from '../houseSearchParams
 import { resolveItemTarget, resolvePaginateTarget } from '../services/agentActions'
 import { displayAptName } from '../utils/houseDisplay'
 
+/**
+ * Backend AI가 반환한 구조화 명령을 검색·페이지 이동·목록 선택·지도 포커스 동작으로 번역한다.
+ * 명령의 조건을 현재 화면 상태에 합친 뒤 기존 검색 hook을 호출해 일반 UI와 같은 경로를 사용한다.
+ */
 export function useAgentCommands({
   filters,
   setFilters,

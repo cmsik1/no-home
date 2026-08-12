@@ -5,6 +5,10 @@ import { PROGRESS_STAGES, clampToMaxLength, getConversationId, messageLength } f
 
 const WELCOME_MESSAGE = '안녕하세요. 서울 아파트 실거래가를 자연어로 검색해 보세요. 예: "강남구 2024년 5월 매매 검색"'
 
+/**
+ * 채팅 메시지와 진행 표시를 관리하고 현재 검색 문맥을 AI assistant API에 전달한다.
+ * 답변은 즉시 메시지로 표시하고, 명령 응답은 useAgentCommands로 넘겨 실제 화면 동작을 수행한다.
+ */
 export function useChatConversation({ loggedIn, currentFilters, currentPage, totalPages, agentResult, onAgentCommand }) {
   const [input, setInputState] = useState('')
   const [loading, setLoading] = useState(false)

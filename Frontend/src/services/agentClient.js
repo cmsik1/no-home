@@ -5,6 +5,7 @@ function retryHint(retryAfter) {
   return Number.isFinite(seconds) && seconds > 0 ? ` ${seconds}초 후 다시 시도해 주세요.` : ''
 }
 
+/** AI assistant의 HTTP·ApiResponse·명령 payload를 화면이 처리하는 answer/command/error로 정규화한다. */
 export function parseAssistantResponse({ status, ok, body, retryAfter } = {}) {
   if (status === 401) return { kind: 'error', text: '로그인이 필요합니다.' }
   if (status === 429) {

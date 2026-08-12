@@ -9,6 +9,10 @@ import { usePriceRange } from './usePriceRange'
 
 const initialFilters = () => ({ ...emptyFilters(), startDealMonth: currentDealMonth(), endDealMonth: currentDealMonth() })
 
+/**
+ * 검색 폼을 Backend 요청으로 변환하는 전 과정을 조율한다. 필터 검증, 요청 취소 판별,
+ * 결과·가격 범위 반영과 지도 마커 갱신을 하나의 검색 세션 상태로 관리한다.
+ */
 export function useHouseSearch({ clearMapMarkers, refreshMapMarkers }) {
   const [filters, setFilters] = useState(initialFilters)
   const [items, setItems] = useState([])
@@ -72,6 +76,10 @@ export function useHouseSearch({ clearMapMarkers, refreshMapMarkers }) {
     return normalized
   }
 
+  /**
+   * 현재 또는 AI가 덮어쓴 필터로 검색하고 여러 API 응답을 하나의 결과 목록으로 합친다.
+   * requestId가 최신인 응답만 반영해 이전 요청의 늦은 응답이 화면을 덮지 못하게 한다.
+   */
   const searchHouses = async (page = 1, overrideFilters = null) => {
     if (!validateRegionForSearch()) return
     const searchFiltersBase = overrideFilters || normalizeDealMonthRangeForSearch()

@@ -2,6 +2,7 @@ import { SearchForm } from './SearchForm.jsx'
 import { MapPanel } from './components/MapPanel.jsx'
 import { ResultList } from './components/ResultList.jsx'
 
+/** 검색 폼·결과 목록과 지도를 한 작업 화면에 배치하고 선택된 매물을 두 영역에 공유한다. */
 export function SearchPage(props) {
   const {
     searchPanelCollapsed,

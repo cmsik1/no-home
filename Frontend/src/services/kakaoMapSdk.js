@@ -5,6 +5,10 @@ import {
 
 let kakaoMapsSdkPromise = null
 
+/**
+ * Kakao Maps 스크립트를 페이지당 한 번만 삽입하고 모든 호출자가 같은 Promise를 공유하게 한다.
+ * autoload=false로 받은 뒤 services 라이브러리까지 준비된 kakao 객체만 반환한다.
+ */
 export function loadKakaoMapsSdk() {
   if (!KAKAO_MAP_API_KEY) {
     return Promise.reject(new Error('VITE_KAKAO_MAP_API_KEY가 설정되지 않았습니다.'))

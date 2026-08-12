@@ -3,6 +3,10 @@ import { fetchPriceRangeResults } from '../services/houseService'
 
 const emptyPriceRange = () => ({ min: null, max: null, monthlyMin: null, monthlyMax: null })
 
+/**
+ * 검색 API가 돌려준 거래 유형별 최소·최대 값을 슬라이더 범위와 검색 필터로 동기화한다.
+ * 매매는 거래금액, 전월세는 보증금, 월세는 보증금과 월세 범위를 각각 사용한다.
+ */
 export function usePriceRange({ filters, updateFilters, validateRegionForSearch }) {
   const [priceRange, setPriceRange] = useState(emptyPriceRange)
   const [priceRangeLoading, setPriceRangeLoading] = useState(false)

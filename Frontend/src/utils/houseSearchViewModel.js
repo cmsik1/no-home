@@ -1,6 +1,7 @@
 import { DEAL_MODE_OPTIONS, SORT_OPTIONS } from '../config/appConfig.js'
 import { sortOptionsForDealMode } from '../houseSearchParams.js'
 
+/** 원시 검색 상태를 페이지 수, 버튼 활성화 여부, 필터 요약 등 표시 전용 값으로 변환한다. */
 export function createHouseSearchViewModel({ filters, priceRange, resultDisplayMode, totalCount, items, searchPage, loading, hasSearched }) {
   const currentPageSize = Number.isFinite(Number(resultDisplayMode)) && Number(resultDisplayMode) > 0 ? Number(resultDisplayMode) : 10
   const totalPages = resultDisplayMode === 'all' ? 1 : Math.max(Math.ceil((totalCount || 0) / currentPageSize), 1)

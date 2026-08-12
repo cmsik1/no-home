@@ -7,6 +7,7 @@ export function houseRequestTimeoutMs(fields = {}) {
   return fields.autoImport === 'true' ? AUTO_IMPORT_REQUEST_TIMEOUT_MS : SEARCH_REQUEST_TIMEOUT_MS
 }
 
+/** fetch에 제한 시간을 부여하고 AbortError를 사용자가 이해할 수 있는 검색 오류로 변환한다. */
 export async function fetchWithTimeout(url, options = {}, timeoutMs = SEARCH_REQUEST_TIMEOUT_MS) {
   const controller = new AbortController()
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs)
@@ -30,6 +31,10 @@ function apiErrorMessage(status, message) {
   return `요청 처리에 실패했습니다. (${status})`
 }
 
+/**
+ * 쿠키 기반 인증을 포함하는 공통 JSON 요청 경계다. Backend의 ApiResponse 형태와 일반 JSON을
+ * 같은 data 값으로 정규화하고 HTTP 상태 및 success=false를 status가 있는 Error로 바꾼다.
+ */
 export async function requestJson(path, options = {}) {
   const headers = {
     Accept: 'application/json',

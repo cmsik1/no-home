@@ -160,6 +160,10 @@ export const buildHousePriceRangeRequests = (filters) => {
   return [fields]
 }
 
+/**
+ * 화면 필터를 `/api/houses/search` 계약의 query 필드로 변환한다. 선택된 서울 자치구와
+ * 거래월이 있을 때만 자동 수집을 요청하고, 거래 유형에 맞는 가격 필드만 포함한다.
+ */
 const buildHouseSearchFields = (filters, options = {}) => {
   const { dealYmd, startDealYmd, endDealYmd } = normalizeDealYmdRange(filters)
   const lawdCds = resolveLawdCds(filters)

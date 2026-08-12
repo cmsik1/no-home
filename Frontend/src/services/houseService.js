@@ -5,6 +5,7 @@ import {
 import { SEARCH_ALL_FETCH_SIZE } from '../config/appConfig'
 import { fetchWithTimeout, houseRequestTimeoutMs } from './apiClient'
 
+/** 직렬화된 검색 필드를 query string으로 보내고 Backend 응답의 data를 검색 payload로 꺼낸다. */
 export async function fetchHouseSearch(fields) {
   const params = new URLSearchParams()
   Object.entries(fields).forEach(([key, value]) => {
@@ -31,6 +32,10 @@ export async function fetchPagedHouseSearchResults(searchFilters, { page, size }
   return Promise.all(buildHouseSearchRequests(searchFilters, { page, size }).map(fetchHouseSearch))
 }
 
+/**
+ * 첫 페이지에서 전체 건수를 확인한 뒤 나머지 페이지를 병렬 조회한다. 최초 요청만 자동 수집을
+ * 허용하고 후속 페이지는 DB 조회만 수행해 같은 공공데이터를 반복 적재하지 않는다.
+ */
 export async function fetchAllHouseSearchResults(searchFilters) {
   const firstRequests = buildHouseSearchRequests(searchFilters, { page: 1, size: SEARCH_ALL_FETCH_SIZE })
   const firstResults = await Promise.all(firstRequests.map(fetchHouseSearch))

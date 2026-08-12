@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { memberService } from '../services/memberService'
 
+/** 관리자 권한을 먼저 확인한 뒤 검색어를 회원 검색 API로 보내고 공통 회원 UI 상태에 반영한다. */
 export function useMemberAdminSearch({ setMemberLoading, setMemberMessage, setMemberError }) {
   const [memberSearchKeyword, setMemberSearchKeyword] = useState('')
   const [memberSearchResults, setMemberSearchResults] = useState([])

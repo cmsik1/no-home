@@ -6,6 +6,10 @@ const EMPTY_LOGIN = { email: '', password: '' }
 const EMPTY_SIGNUP = { email: '', password: '', name: '', phone: '' }
 const EMPTY_PASSWORD_RESET = { email: '', name: '', phone: '', newPassword: '' }
 
+/**
+ * 회원 세션과 가입·로그인·프로필·탈퇴 폼을 관리한다. API 응답의 회원을 단일 현재 회원
+ * 상태로 모으고, 로그아웃이나 401 응답 시 관리자 검색 등 로그인 종속 상태도 함께 비운다.
+ */
 export function useMemberAccount({ setActivePage, onLogoutCleanup, onLoginSuccess } = {}) {
   const [member, setMember] = useState(null)
   const [accountMode, setAccountMode] = useState('login')

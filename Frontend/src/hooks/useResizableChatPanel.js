@@ -3,6 +3,7 @@ import { clampPanelSize, loadPanelSize, savePanelSize } from '../utils/chatPanel
 
 const VIEWPORT_MARGIN = 40
 
+/** 포인터 이동량을 패널 크기로 변환하고 화면 경계로 제한한 뒤 마지막 크기를 저장한다. */
 export function useResizableChatPanel() {
   const initialSize = useMemo(() => loadPanelSize(), [])
   const [size, setSize] = useState(initialSize)

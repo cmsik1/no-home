@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { fetchLegalDongs } from '../services/regionService'
 
+/** 선택한 자치구 코드를 법정동 선택 목록으로 바꾸며, 최신 요청의 결과만 화면에 반영한다. */
 export function useLegalDongs(selectedLawdCd) {
   const [legalDongs, setLegalDongs] = useState([])
   const [legalDongLoading, setLegalDongLoading] = useState(false)

@@ -1,5 +1,6 @@
 import { requestJson } from './apiClient'
 
+/** 관심지역 API 응답을 화면에서 바로 반복 가능한 배열로 정규화한다. */
 export async function fetchInterestRegions() {
   const regions = await requestJson('/api/interest-regions')
   return Array.isArray(regions) ? regions : []

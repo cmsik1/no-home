@@ -9,6 +9,10 @@ import { useMemberAccount } from './useMemberAccount'
 import { useNotices } from './useNotices'
 import { fieldText } from '../utils/houseDisplay'
 
+/**
+ * 검색·지도·회원·공지·관심지역·AI hook을 하나의 화면 컨트롤러로 조립한다.
+ * 하위 hook의 상태를 페이지용 파생 값과 이동 동작으로 묶어 AppRoutes에 제공한다.
+ */
 export function useAppController() {
   const [activePage, setActivePage] = useState('search')
   const mapControlsRef = useRef({
@@ -16,6 +20,8 @@ export function useAppController() {
     refreshMapMarkers: () => {},
   })
 
+  // 검색 완료 시 지도 갱신이 필요하지만 지도 hook도 검색 결과를 입력으로 받으므로,
+  // ref 기반 중계 함수를 두어 두 hook 사이의 초기화 순환 의존을 끊는다.
   const search = useHouseSearch({
     clearMapMarkers: (...args) => mapControlsRef.current.clearMapMarkers(...args),
     refreshMapMarkers: (...args) => mapControlsRef.current.refreshMapMarkers(...args),

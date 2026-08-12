@@ -7,6 +7,10 @@ import {
 import { loadKakaoMapsSdk } from '../services/kakaoMapSdk'
 import { itemKey, mapAddress } from '../utils/houseDisplay'
 
+/**
+ * Kakao Maps SDK와 지도 인스턴스의 수명주기를 관리한다. 검색 결과 주소를 좌표로 변환해
+ * 마커를 만들고, 목록 선택 상태와 지도 중심·선택 마커를 양방향으로 동기화한다.
+ */
 export function useKakaoHouseMap({ activePage, hasSearched, items, selectedItem, onSelectItem }) {
   const [kakao, setKakao] = useState(null)
   const [mapReady, setMapReady] = useState(false)
@@ -116,6 +120,7 @@ export function useKakaoHouseMap({ activePage, hasSearched, items, selectedItem,
     }
   }, [ensureMap, kakao, mapReady, onSelectItem, updateSelectedMarker])
 
+  /** 검색 결과를 병렬 지오코딩한 뒤 성공한 항목만 마커 데이터로 보존하고 렌더링한다. */
   const refreshMapMarkers = useCallback(async (nextItems = items) => {
     clearMapMarkers()
     if (!nextItems.length) return

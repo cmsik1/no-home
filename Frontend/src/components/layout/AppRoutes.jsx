@@ -7,6 +7,7 @@ import {
   buildSearchPageProps,
 } from './routeProps'
 
+/** 현재 페이지 상태에 맞는 화면을 선택하고 검색 화면에서만 AI 대화 문맥을 연결한다. */
 export function AppRoutes({ controller }) {
   const { activePage, search, memberAccount, agent, isNoticeAdmin } = controller
 

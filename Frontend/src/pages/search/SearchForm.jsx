@@ -2,6 +2,7 @@ import { InterestRegions } from './components/InterestRegions.jsx'
 import { PriceFilter } from './components/PriceFilter.jsx'
 import { RegionFields } from './components/RegionFields.jsx'
 
+/** 분리된 검색 상태를 사용자 입력으로 갱신하고 제출 시 첫 페이지 검색을 시작하는 폼이다. */
 export function SearchForm({
   filters,
   updateFilter,

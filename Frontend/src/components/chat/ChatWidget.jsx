@@ -3,6 +3,7 @@ import { useChatConversation } from '../../hooks/useChatConversation'
 import { useResizableChatPanel } from '../../hooks/useResizableChatPanel'
 import { ChatPanel } from './ChatPanel.jsx'
 
+/** 대화 상태와 패널 크기 상태를 결합하고, 열린 동안에만 AI 패널을 화면에 유지한다. */
 export default function ChatWidget({ loggedIn = false, currentFilters = {}, currentPage = 1, totalPages = 1, agentResult = null, onAgentCommand }) {
   const [open, setOpen] = useState(false)
   const inputRef = useRef(null)
