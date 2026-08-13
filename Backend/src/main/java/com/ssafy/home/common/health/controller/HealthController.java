@@ -3,6 +3,8 @@ package com.ssafy.home.common.health.controller;
 import com.ssafy.home.common.health.dto.HealthResponse;
 import com.ssafy.home.common.health.service.HealthService;
 import com.ssafy.home.common.response.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +23,12 @@ public class HealthController {
     }
 
     @GetMapping
-    public ApiResponse<HealthResponse> health() {
+    public ResponseEntity<ApiResponse<HealthResponse>> health() {
         HealthResponse health = healthService.check();
         if (health.database().connected()) {
-            return ApiResponse.ok(health);
+            return ResponseEntity.ok(ApiResponse.ok(health));
         }
-        return ApiResponse.fail("application is running, but database check failed", health);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiResponse.fail("application is running, but database check failed", health));
     }
 }

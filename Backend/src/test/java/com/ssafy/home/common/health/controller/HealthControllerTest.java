@@ -28,4 +28,18 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.data.status").value("UP"))
                 .andExpect(jsonPath("$.data.database.connected").value(true));
     }
+
+    @Test
+    void healthReturnsServiceUnavailableWhenDatabaseIsDisconnected() throws Exception {
+        HealthService healthService = mock(HealthService.class);
+        when(healthService.check()).thenReturn(
+                new HealthResponse("DEGRADED", DatabaseHealth.disconnected("DataAccessException")));
+        MockMvc mockMvc = standaloneSetup(new HealthController(healthService)).build();
+
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.data.status").value("DEGRADED"))
+                .andExpect(jsonPath("$.data.database.connected").value(false));
+    }
 }

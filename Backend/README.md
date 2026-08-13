@@ -52,6 +52,8 @@ AI_CHAT_RATE_LIMIT_ENABLED=true
 
 운영 DB URL은 `jdbc:postgresql://` 형식이어야 합니다. Neon을 연결할 때는 Dashboard가 제공하는 호스트·DB 이름을 사용하고 `sslmode=require` 같은 TLS 옵션을 포함합니다. 실제 URL, 사용자명, 비밀번호와 JWT 원문은 저장소에 기록하지 않습니다.
 
+Render 배포 설정은 루트 `render.yaml`이 기준입니다. Render가 제공하는 `PORT`를 자동으로 사용하며, 운영 profile의 Hikari pool은 기본 최대 5개·최소 유휴 0개로 제한됩니다. Neon은 Hikari가 연결을 관리할 수 있도록 직접 endpoint를 사용하고 실제 credential은 Render Dashboard에만 입력합니다.
+
 ## DB 실행
 
 Compose 파일은 모노레포 루트에 하나만 둡니다. PostgreSQL만 실행하려면 루트에서 다음 명령을 사용합니다.
