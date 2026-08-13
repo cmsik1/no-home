@@ -40,6 +40,7 @@ VITE_API_PROXY_TARGET=http://localhost:8080
 - `VITE_API_PROXY_TARGET`: Vite 개발 서버가 `/api` 요청을 전달할 Backend 주소
 
 실제 키와 비밀번호는 `.env`에만 작성하고 Git에 커밋하지 않습니다.
+`VITE_` 변수는 빌드 결과에 포함되어 브라우저에서 확인할 수 있으므로 비밀값 저장 용도로 사용하면 안 됩니다. Kakao JavaScript key는 Kakao Developers에서 허용 도메인을 제한해 보호합니다. 키가 비어 있어도 테스트와 빌드는 가능하지만 지도 기능은 비활성 상태로 안내됩니다.
 
 ## Source Structure
 

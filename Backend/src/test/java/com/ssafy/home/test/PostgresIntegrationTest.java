@@ -22,5 +22,7 @@ public abstract class PostgresIntegrationTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.datasource.driver-class-name", POSTGRES::getDriverClassName);
+        registry.add("auth.jwt.secret", () -> "no-home-test-only-jwt-secret-with-more-than-32-characters");
+        registry.add("auth.jwt.cookie-secure", () -> "false");
     }
 }

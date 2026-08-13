@@ -36,6 +36,10 @@ JWT_SECRET
 
 The example file contains local-only placeholders. Do not commit real passwords, API keys, JWT secrets, or machine-specific settings.
 
+Backend settings follow a fail-closed production contract. `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and `JWT_COOKIE_SECURE=true` are required when the `prod` profile is active. Public-data, Kakao, and SSAFY GMS keys are optional at startup: leaving one empty disables or defers failure to that integration without blocking the base application build.
+
+Tests inject an isolated test JWT and Testcontainers database connection. They do not require a personal `.env` file or real external API keys.
+
 ## Run With Docker Compose
 
 Run the full stack from the repository root.

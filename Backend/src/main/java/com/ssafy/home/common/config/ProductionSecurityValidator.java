@@ -1,10 +1,5 @@
 package com.ssafy.home.common.config;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,24 +10,9 @@ import java.util.List;
  * too short, or when secure cookies are disabled. Error messages report only the
  * reason and never echo the configured secret value.
  */
-@Component
-@Profile("prod")
-public class ProductionSecurityValidator implements InitializingBean {
+final class ProductionSecurityValidator {
 
-    private final String jwtSecret;
-    private final boolean cookieSecure;
-
-    public ProductionSecurityValidator(
-            @Value("${auth.jwt.secret:}") String jwtSecret,
-            @Value("${auth.jwt.cookie-secure:false}") boolean cookieSecure
-    ) {
-        this.jwtSecret = jwtSecret;
-        this.cookieSecure = cookieSecure;
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        validate(jwtSecret, cookieSecure);
+    private ProductionSecurityValidator() {
     }
 
     /**

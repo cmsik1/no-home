@@ -30,6 +30,8 @@ POSTGRES_PORT=5432
 DB_URL=jdbc:postgresql://localhost:5432/no_home
 DB_USERNAME=no_home
 DB_PASSWORD=no_home_dev_password
+JWT_SECRET=32자 이상의 로컬 전용 값
+JWT_COOKIE_SECURE=false
 PUBLIC_DATA_SERVICE_KEY=
 PUBLIC_DATA_APT_RENT_SERVICE_KEY=
 KAKAO_MAP_API_KEY=
@@ -40,6 +42,15 @@ AI_CHAT_RATE_LIMIT_ENABLED=true
 - `PUBLIC_DATA_SERVICE_KEY`: 국토교통부 아파트 매매 실거래가 API key
 - `PUBLIC_DATA_APT_RENT_SERVICE_KEY`: 국토교통부 아파트 전월세 실거래가 API key
 - 두 공공데이터 키는 별도로 필요합니다.
+
+### 환경별 설정 계약
+
+- 로컬: 루트 `.env`와 Docker Compose를 사용하며 `JWT_COOKIE_SECURE=false`를 허용합니다.
+- 테스트: Testcontainers PostgreSQL과 테스트 전용 JWT를 코드에서 주입하므로 개인 `.env`가 필요하지 않습니다.
+- 운영: `SPRING_PROFILES_ACTIVE=prod`와 함께 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_COOKIE_SECURE=true`를 모두 설정해야 합니다.
+- 선택 기능: 공공데이터, Kakao REST, SSAFY GMS API key는 비어 있어도 서버가 기동됩니다. 실제 해당 기능 호출만 명확한 비활성 또는 설정 오류 응답을 반환합니다.
+
+운영 DB URL은 `jdbc:postgresql://` 형식이어야 합니다. Neon을 연결할 때는 Dashboard가 제공하는 호스트·DB 이름을 사용하고 `sslmode=require` 같은 TLS 옵션을 포함합니다. 실제 URL, 사용자명, 비밀번호와 JWT 원문은 저장소에 기록하지 않습니다.
 
 ## DB 실행
 
