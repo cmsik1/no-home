@@ -28,7 +28,7 @@ services:
       DB_USERNAME: ${POSTGRES_USER:?POSTGRES_USER is required}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,7 +40,7 @@ services:
       VITE_API_PROXY_TARGET: http://backend:8080
       VITE_KAKAO_MAP_API_KEY: ${VITE_KAKAO_MAP_API_KEY:-}
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
       - backend
 

@@ -51,7 +51,8 @@ $requiredFiles = @(
     'Frontend/deployment/vercelConfig.test.js',
     'Frontend/package.json',
     'scripts/check-markdown-links.ps1',
-    'scripts/check-runtime-values.ps1'
+    'scripts/check-runtime-values.ps1',
+    'scripts/run-compose-smoke.ps1'
 )
 foreach ($relativeFile in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $RepositoryRoot $relativeFile) -PathType Leaf)) {
@@ -60,7 +61,15 @@ foreach ($relativeFile in $requiredFiles) {
 }
 
 $rootEnvironment = Get-Content -LiteralPath (Join-Path $RepositoryRoot '.env.example') -Raw -Encoding utf8
-foreach ($requiredVariable in @('DB_URL', 'DB_USERNAME', 'DB_PASSWORD', 'JWT_SECRET', 'JWT_COOKIE_SECURE')) {
+foreach ($requiredVariable in @(
+    'DB_URL',
+    'DB_USERNAME',
+    'DB_PASSWORD',
+    'JWT_SECRET',
+    'JWT_COOKIE_SECURE',
+    'BACKEND_PORT',
+    'FRONTEND_PORT'
+)) {
     Assert-Pattern -Content $rootEnvironment -Pattern "(?m)^${requiredVariable}=" `
         -Message ".env.example must declare $requiredVariable"
 }
@@ -108,6 +117,12 @@ foreach ($secretVariable in @('DB_URL', 'DB_USERNAME', 'DB_PASSWORD', 'JWT_SECRE
 }
 Write-Host 'OK: environment examples and Render deployment contract'
 
+$composeConfig = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'docker-compose.yml') -Raw -Encoding utf8
+Assert-Pattern -Content $composeConfig -Pattern '\$\{BACKEND_PORT:-8080\}:8080' `
+    -Message 'Docker Compose must allow an isolated Backend host port'
+Assert-Pattern -Content $composeConfig -Pattern '\$\{FRONTEND_PORT:-5173\}:5173' `
+    -Message 'Docker Compose must allow an isolated Frontend host port'
+
 Assert-Command -Name 'docker'
 $temporaryEnvironment = [System.IO.Path]::GetTempFileName()
 try {
@@ -117,6 +132,8 @@ try {
         'POSTGRES_DB=no_home_preflight',
         'POSTGRES_USER=no_home_preflight',
         'POSTGRES_PASSWORD=preflight-only-database-password',
+        'BACKEND_PORT=0',
+        'FRONTEND_PORT=0',
         'DB_URL=jdbc:postgresql://postgres:5432/no_home_preflight',
         'DB_USERNAME=no_home_preflight',
         'DB_PASSWORD=preflight-only-database-password',

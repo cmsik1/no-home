@@ -98,3 +98,24 @@ jobs:
 
       - name: Build Frontend
         run: npm run build
+
+  compose-smoke:
+    name: Compose Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Run isolated Compose smoke test
+        shell: pwsh
+        run: ./scripts/run-compose-smoke.ps1 -ArtifactDirectory "${{ runner.temp }}/compose-smoke"
+
+      - name: Upload Compose diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compose-smoke-logs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compose-smoke/**
+          if-no-files-found: warn
+          retention-days: 7
