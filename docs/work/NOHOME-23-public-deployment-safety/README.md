@@ -4,7 +4,7 @@
 
 ## 상태
 
-- Jira: NOHOME-23 (`진행 중`)
+- Jira: NOHOME-23 (`완료`)
 - 브랜치: `codex/NOHOME-23-public-deployment-safety`
 - 현재 단계: 사용자 승인 완료, 마감
 

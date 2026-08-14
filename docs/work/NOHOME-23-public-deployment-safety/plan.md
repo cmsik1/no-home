@@ -34,4 +34,4 @@
 ## 잔여 범위
 
 - 실제 Neon 운영 DB 생성은 NOHOME-24에서 진행한다.
-- 원격 CI·CodeQL은 main 반영 후 실행 결과를 확인한다.
+- GitHub CI와 CodeQL은 main 커밋 `ea8df16`에서 모두 성공했다.
