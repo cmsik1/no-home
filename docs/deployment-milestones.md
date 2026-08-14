@@ -13,6 +13,7 @@
 ## M2. 자동 검증 체계 구축
 
 - Backend, Frontend, 환경설정과 배포 구성을 CI와 사전 검사로 검증한다.
+- 완료: NOHOME-17~21에서 로컬 사전 검사, Node 24 보안 기준, GitHub CI, Compose Smoke Test와 CodeQL 통합 검증을 마쳤다.
 
 ## M3. 클라우드 연결 및 공개 배포
 

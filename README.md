@@ -1,5 +1,8 @@
 # NoHome
 
+[![CI](https://github.com/cmsik1/no-home/actions/workflows/ci.yml/badge.svg)](https://github.com/cmsik1/no-home/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/cmsik1/no-home/actions/workflows/codeql.yml/badge.svg)](https://github.com/cmsik1/no-home/actions/workflows/codeql.yml)
+
 NoHome is a full-stack housing search project with a Spring Boot backend, React/Vite frontend, PostgreSQL database, public data imports, Kakao Map integration, member authentication, notices, interest regions, and an AI assistant.
 
 The refactored application follows a React `page -> hook -> service` flow and a Spring `controller -> application service -> persistence port -> JPA adapter` flow. Database changes are versioned with Flyway. See [the architecture notes](docs/refactoring-architecture.md) for the rationale and interview-ready explanation.
@@ -14,6 +17,24 @@ NoHome/
 ```
 
 Start with [the documentation index](docs/README.md) to distinguish current guides from historical records.
+
+## Automated Verification
+
+GitHub Actions runs the deployment preflight, Backend tests and packaging, Frontend security checks and tests, the full Docker Compose smoke test, and CodeQL analysis on `main` pushes and pull requests. These checks use generated test values and do not require personal API keys.
+
+Run the deployment contract locally from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-deployment-preflight.ps1
+```
+
+Run the isolated full-stack smoke test with Docker Desktop running:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-compose-smoke.ps1
+```
+
+On Linux or another environment with PowerShell 7, replace `powershell` with `pwsh`.
 
 ## Local Setup
 
