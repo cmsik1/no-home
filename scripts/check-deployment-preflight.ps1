@@ -47,7 +47,9 @@ $requiredFiles = @(
     'docker-compose.yml',
     'render.yaml',
     'Frontend/.env.example',
+    'Frontend/Dockerfile',
     'Frontend/deployment/vercelConfig.test.js',
+    'Frontend/package.json',
     'scripts/check-markdown-links.ps1',
     'scripts/check-runtime-values.ps1'
 )
@@ -75,6 +77,17 @@ foreach ($optionalVariable in @(
 $frontendEnvironment = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'Frontend/.env.example') -Raw -Encoding utf8
 Assert-Pattern -Content $frontendEnvironment -Pattern '(?m)^BACKEND_ORIGIN=\s*$' `
     -Message 'Frontend/.env.example must declare an empty BACKEND_ORIGIN placeholder'
+
+$frontendPackage = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'Frontend/package.json') -Raw -Encoding utf8 |
+    ConvertFrom-Json
+if ($frontendPackage.engines.node -ne '24.x') {
+    throw 'Frontend package.json must declare engines.node as 24.x for Vercel and local tooling'
+}
+
+$frontendDockerfile = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'Frontend/Dockerfile') -Raw -Encoding utf8
+Assert-Pattern -Content $frontendDockerfile -Pattern '(?m)^FROM\s+node:24-alpine\s*$' `
+    -Message 'Frontend Dockerfile must use the Node 24 Alpine runtime'
+Write-Host 'OK: Frontend Node 24 runtime contract'
 
 $renderConfig = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'render.yaml') -Raw -Encoding utf8
 $renderContracts = [ordered]@{

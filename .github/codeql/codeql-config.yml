@@ -1,0 +1,13 @@
+name: NoHome source scope
+
+paths:
+  - Backend/src
+  - Frontend/deployment
+  - Frontend/src
+  - Frontend/vercel.ts
+
+paths-ignore:
+  - Backend/target
+  - Frontend/dist
+  - Frontend/node_modules
+  - docs/archive

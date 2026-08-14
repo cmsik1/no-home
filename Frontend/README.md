@@ -9,6 +9,8 @@ NoHome의 React/Vite 프론트엔드입니다. 사용자는 서울 아파트 실
 - JavaScript
 - Kakao Map JavaScript SDK
 
+로컬 개발과 Vercel 빌드는 `package.json`의 계약에 따라 Node.js 24 LTS를 사용합니다.
+
 ## Run Locally
 
 루트 `.env.example`을 기준으로 루트 `.env`를 만든 뒤 실행합니다.
@@ -23,7 +25,7 @@ docker compose up -d --build
 
 ```powershell
 cd Frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -96,4 +98,7 @@ sequenceDiagram
 ```powershell
 npm test
 npm run build
+npm run audit:security
 ```
+
+보안 감사 명령은 high 또는 critical 의존성 취약점이 발견되면 실패합니다.
