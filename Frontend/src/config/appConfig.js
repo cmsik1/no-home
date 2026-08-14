@@ -1,5 +1,10 @@
 const env = import.meta.env || {}
 
+function deploymentFeatureEnabled(configuredValue) {
+  if (configuredValue === undefined || String(configuredValue).trim() === '') return !env.PROD
+  return String(configuredValue).trim().toLowerCase() === 'true'
+}
+
 export const SEARCH_ALL_FETCH_SIZE = 100
 export const SEARCH_REQUEST_TIMEOUT_MS = 25000
 export const AUTO_IMPORT_REQUEST_TIMEOUT_MS = SEARCH_REQUEST_TIMEOUT_MS
@@ -30,10 +35,14 @@ export const DEAL_MODE_OPTIONS = [
   { value: 'all', label: '전체' },
 ]
 
-export const NOTICE_ADMIN_EMAILS = (env.VITE_NOTICE_ADMIN_EMAILS || 'admin@nohome.local,admin@example.com')
+export const NOTICE_ADMIN_EMAILS = (env.VITE_NOTICE_ADMIN_EMAILS || '')
   .split(',')
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean)
+
+// Production builds mirror the Backend's fail-closed feature policy.
+export const PASSWORD_RESET_ENABLED = deploymentFeatureEnabled(env.VITE_PASSWORD_RESET_ENABLED)
+export const MEMBER_SEARCH_ENABLED = deploymentFeatureEnabled(env.VITE_MEMBER_SEARCH_ENABLED)
 
 export const KAKAO_MAP_API_KEY = env.VITE_KAKAO_MAP_API_KEY
 export const KAKAO_MAP_SDK_ERROR_MESSAGE = 'Kakao Map SDK를 불러오지 못했습니다. JavaScript 키와 Kakao Developers 웹 플랫폼의 사이트 도메인을 확인해 주세요.'

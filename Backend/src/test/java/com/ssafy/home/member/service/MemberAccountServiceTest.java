@@ -1,5 +1,7 @@
 package com.ssafy.home.member.service;
 
+import com.ssafy.home.common.feature.DeploymentFeaturePolicy;
+import com.ssafy.home.common.feature.FeatureDisabledException;
 import com.ssafy.home.member.auth.MemberAuthService;
 import com.ssafy.home.member.dto.MemberResponse;
 import com.ssafy.home.member.dto.PasswordResetRequest;
@@ -10,6 +12,8 @@ import java.time.LocalDateTime;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class MemberAccountServiceTest {
 
@@ -27,6 +31,18 @@ class MemberAccountServiceTest {
         var ordered = inOrder(memberService, authService);
         ordered.verify(memberService).resetPassword(request);
         ordered.verify(authService).revokeMember(3L);
+    }
+
+    @Test
+    void disabledPasswordResetStopsBeforeMemberDataChanges() {
+        MemberAccountService disabledService = new MemberAccountService(memberService, authService,
+                new DeploymentFeaturePolicy(false, true, true, true));
+
+        assertThatThrownBy(() -> disabledService.resetPassword(
+                new PasswordResetRequest("user@example.com", "User", "010", "new-password")))
+                .isInstanceOf(FeatureDisabledException.class)
+                .hasMessage("FEATURE_DISABLED");
+        verifyNoInteractions(memberService, authService);
     }
 
     @Test

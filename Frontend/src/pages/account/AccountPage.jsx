@@ -3,6 +3,7 @@ import { LoginForm } from './components/LoginForm.jsx'
 import { PasswordResetForm } from './components/PasswordResetForm.jsx'
 import { ProfilePanel } from './components/ProfilePanel.jsx'
 import { SignupForm } from './components/SignupForm.jsx'
+import { PASSWORD_RESET_ENABLED } from '../../config/appConfig'
 
 /** 현재 회원 유무와 accountMode에 따라 가입·로그인·재설정·프로필 흐름 중 하나를 표시한다. */
 export function AccountPage(props) {
@@ -12,6 +13,7 @@ export function AccountPage(props) {
     profileForm, setProfileForm, profileEditing, setProfileEditing, deleteConfirm, setDeleteConfirm,
     onClose, loginMember, signupMember, resetPassword, logoutMember, updateMember, deleteMember,
   } = props
+  const visibleAccountMode = accountMode === 'password-reset' && !PASSWORD_RESET_ENABLED ? 'login' : accountMode
 
   return (
     <main className="notice-page account-page" aria-label="Account page">
@@ -21,11 +23,11 @@ export function AccountPage(props) {
           <button className="back-button compact-button" type="button" onClick={onClose}>Back to Search</button>
         </div>
 
-        {!member && <AccountTabs accountMode={accountMode} setAccountMode={setAccountMode} />}
+        {!member && <AccountTabs accountMode={visibleAccountMode} setAccountMode={setAccountMode} passwordResetEnabled={PASSWORD_RESET_ENABLED} />}
         {memberMessage && <p className="account-message">{memberMessage}</p>}
         {memberError && <p className="account-message is-error">{memberError}</p>}
 
-        {accountMode === 'login' && !member && (
+        {visibleAccountMode === 'login' && !member && (
           <LoginForm
             form={loginForm}
             setForm={setLoginForm}
@@ -35,7 +37,7 @@ export function AccountPage(props) {
           />
         )}
 
-        {accountMode === 'password-reset' && !member && (
+        {visibleAccountMode === 'password-reset' && PASSWORD_RESET_ENABLED && !member && (
           <PasswordResetForm
             form={passwordResetForm}
             setForm={setPasswordResetForm}
@@ -45,7 +47,7 @@ export function AccountPage(props) {
           />
         )}
 
-        {accountMode === 'signup' && !member && (
+        {visibleAccountMode === 'signup' && !member && (
           <SignupForm
             form={signupForm}
             setForm={setSignupForm}

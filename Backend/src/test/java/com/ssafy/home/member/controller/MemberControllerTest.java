@@ -1,5 +1,6 @@
 package com.ssafy.home.member.controller;
 
+import com.ssafy.home.common.feature.FeatureDisabledException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.house.service.HouseService;
@@ -116,6 +117,22 @@ class MemberControllerTest {
     }
 
     @Test
+    void disabledPasswordResetReturnsServiceUnavailable() throws Exception {
+        MemberService service = mock(MemberService.class);
+        MemberAuthService authService = mock(MemberAuthService.class);
+        when(service.resetPassword(any(PasswordResetRequest.class))).thenThrow(new FeatureDisabledException());
+
+        mockMvc(service, authService).perform(post("/api/auth/password-reset")
+                        .contentType("application/json")
+                        .content("""
+                                {"email":"user@example.com","name":"User","phone":"010","newPassword":"new-password"}
+                                """))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("FEATURE_DISABLED"));
+    }
+
+    @Test
     void refreshRotatesCookiesAndInvalidRefreshReturnsUnauthorized() throws Exception {
         MemberService service = mock(MemberService.class);
         MemberAuthService authService = mock(MemberAuthService.class);
@@ -199,6 +216,19 @@ class MemberControllerTest {
                         .param("keyword", "user"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void disabledMemberSearchReturnsServiceUnavailableForAuthenticatedMember() throws Exception {
+        MemberService service = mock(MemberService.class);
+        MemberAuthService authService = mock(MemberAuthService.class);
+        when(service.searchMembers(1L, "user")).thenThrow(new FeatureDisabledException());
+
+        mockMvc(service, authService).perform(get("/api/members/search")
+                        .requestAttr(AuthenticatedMember.REQUEST_ATTRIBUTE, 1L)
+                        .param("keyword", "user"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("FEATURE_DISABLED"));
     }
 
     @Test

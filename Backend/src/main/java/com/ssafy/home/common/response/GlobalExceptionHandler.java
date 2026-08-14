@@ -1,6 +1,7 @@
 package com.ssafy.home.common.response;
 
 import com.ssafy.home.house.service.AutoImportException;
+import com.ssafy.home.common.feature.FeatureDisabledException;
 import com.ssafy.home.interest.service.InterestRegionException;
 import com.ssafy.home.member.service.MemberException;
 import com.ssafy.home.notice.service.NoticeException;
@@ -15,6 +16,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(FeatureDisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFeatureDisabled(FeatureDisabledException exception) {
+        return failure(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
+    }
 
     @ExceptionHandler(MemberException.class)
     public ResponseEntity<ApiResponse<Void>> handleMember(MemberException exception) {

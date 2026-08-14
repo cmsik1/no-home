@@ -16,6 +16,16 @@ services:
         value: "true"
       - key: JAVA_TOOL_OPTIONS
         value: -XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0
+      - key: PASSWORD_RESET_ENABLED
+        value: "false"
+      - key: MEMBER_SEARCH_ENABLED
+        value: "false"
+      - key: PUBLIC_DATA_LIVE_SEARCH_ENABLED
+        value: "false"
+      - key: PUBLIC_DATA_MANUAL_IMPORT_ENABLED
+        value: "false"
+      - key: NOTICE_ADMIN_EMAILS
+        value: ""
       - key: DB_URL
         sync: false
       - key: DB_USERNAME

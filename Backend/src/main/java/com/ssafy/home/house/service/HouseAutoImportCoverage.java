@@ -1,5 +1,6 @@
 package com.ssafy.home.house.service;
 
+import com.ssafy.home.common.feature.DeploymentFeaturePolicy;
 import com.ssafy.home.common.region.SeoulLawdCodeResolver;
 import com.ssafy.home.house.dto.AutoImportRangeResponse;
 import com.ssafy.home.house.dto.HouseSearchCondition;
@@ -14,6 +15,7 @@ import com.ssafy.home.publicdata.service.PublicDataLiveSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.net.SocketTimeoutException;
@@ -42,23 +44,37 @@ final class HouseAutoImportCoverage {
     private final PublicDataAptRentImportService publicDataAptRentImportService;
     private final PublicDataLiveSearchService publicDataLiveSearchService;
     private final SeoulLawdCodeResolver seoulLawdCodeResolver;
+    private final DeploymentFeaturePolicy featurePolicy;
 
+    @Autowired
     HouseAutoImportCoverage(
             HousePersistencePort housePersistencePort,
             PublicDataImportService publicDataImportService,
             PublicDataAptRentImportService publicDataAptRentImportService,
             PublicDataLiveSearchService publicDataLiveSearchService,
-            SeoulLawdCodeResolver seoulLawdCodeResolver
+            SeoulLawdCodeResolver seoulLawdCodeResolver,
+            DeploymentFeaturePolicy featurePolicy
     ) {
         this.housePersistencePort = housePersistencePort;
         this.publicDataImportService = publicDataImportService;
         this.publicDataAptRentImportService = publicDataAptRentImportService;
         this.publicDataLiveSearchService = publicDataLiveSearchService;
         this.seoulLawdCodeResolver = seoulLawdCodeResolver;
+        this.featurePolicy = featurePolicy;
+    }
+
+    HouseAutoImportCoverage(HousePersistencePort housePersistencePort,
+                            PublicDataImportService publicDataImportService,
+                            PublicDataAptRentImportService publicDataAptRentImportService,
+                            PublicDataLiveSearchService publicDataLiveSearchService,
+                            SeoulLawdCodeResolver seoulLawdCodeResolver) {
+        this(housePersistencePort, publicDataImportService, publicDataAptRentImportService,
+                publicDataLiveSearchService, seoulLawdCodeResolver, DeploymentFeaturePolicy.allEnabled());
     }
 
     AutoImportMetadata ensureCoverage(HouseSearchCondition condition, Boolean autoImport) {
-        if (!Boolean.TRUE.equals(autoImport) || !canAutoImport(condition)) {
+        if (!featurePolicy.publicDataLiveSearchEnabled()
+                || !Boolean.TRUE.equals(autoImport) || !canAutoImport(condition)) {
             return AutoImportMetadata.notAttempted();
         }
 
@@ -97,7 +113,8 @@ final class HouseAutoImportCoverage {
     }
 
     Optional<LiveCoverageRequest> liveCoverageRequest(HouseSearchCondition condition, Boolean autoImport) {
-        if (!Boolean.TRUE.equals(autoImport) || publicDataLiveSearchService == null || !canAutoImport(condition)) {
+        if (!featurePolicy.publicDataLiveSearchEnabled()
+                || !Boolean.TRUE.equals(autoImport) || publicDataLiveSearchService == null || !canAutoImport(condition)) {
             return Optional.empty();
         }
 

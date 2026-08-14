@@ -1,5 +1,6 @@
 package com.ssafy.home.publicdata.controller;
 
+import com.ssafy.home.common.feature.FeatureDisabledException;
 import com.ssafy.home.common.response.GlobalExceptionHandler;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
 import com.ssafy.home.publicdata.service.PublicDataImportFacade;
@@ -46,6 +47,20 @@ class PublicDataImportControllerTest {
                         .param("dealMode", "unknown"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void disabledManualImportReturnsServiceUnavailable() throws Exception {
+        PublicDataImportFacade facade = mock(PublicDataImportFacade.class);
+        when(facade.importAptDeals("11590", "202405", "sale"))
+                .thenThrow(new FeatureDisabledException());
+
+        mockMvc(facade).perform(post("/api/public-data/apt-trades/import")
+                        .param("lawdCd", "11590")
+                        .param("dealYmd", "202405")
+                        .param("dealMode", "sale"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("FEATURE_DISABLED"));
     }
 
     private static MockMvc mockMvc(PublicDataImportFacade facade) {

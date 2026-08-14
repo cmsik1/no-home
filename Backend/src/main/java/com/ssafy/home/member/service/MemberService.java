@@ -1,5 +1,6 @@
 package com.ssafy.home.member.service;
 
+import com.ssafy.home.common.feature.DeploymentFeaturePolicy;
 import com.ssafy.home.member.dto.Member;
 import com.ssafy.home.member.dto.MemberResponse;
 import com.ssafy.home.member.dto.MemberSignupRequest;
@@ -8,6 +9,7 @@ import com.ssafy.home.member.dto.PasswordResetRequest;
 import com.ssafy.home.member.persistence.MemberInsertCommand;
 import com.ssafy.home.member.persistence.MemberPersistencePort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +28,24 @@ public class MemberService {
     private final MemberPersistencePort memberPersistencePort;
     private final PasswordHasher passwordHasher;
     private final Set<String> adminEmails;
+    private final DeploymentFeaturePolicy featurePolicy;
 
+    @Autowired
     public MemberService(
             MemberPersistencePort memberPersistencePort,
             PasswordHasher passwordHasher,
-            @Value("${notice.admin-emails:}") String adminEmails
+            @Value("${notice.admin-emails:}") String adminEmails,
+            DeploymentFeaturePolicy featurePolicy
     ) {
         this.memberPersistencePort = memberPersistencePort;
         this.passwordHasher = passwordHasher;
         this.adminEmails = parseAdminEmails(adminEmails);
+        this.featurePolicy = featurePolicy;
+    }
+
+    public MemberService(MemberPersistencePort memberPersistencePort, PasswordHasher passwordHasher,
+                         String adminEmails) {
+        this(memberPersistencePort, passwordHasher, adminEmails, DeploymentFeaturePolicy.allEnabled());
     }
 
     @Transactional
@@ -90,6 +101,7 @@ public class MemberService {
     }
 
     public List<MemberResponse> searchMembers(Long currentMemberId, String keyword) {
+        featurePolicy.requireMemberSearchEnabled();
         requireAdminMemberId(currentMemberId);
         String normalizedKeyword = required(keyword, "keyword is required.");
         return memberPersistencePort.searchMembers(normalizedKeyword).stream()

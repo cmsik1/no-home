@@ -68,7 +68,11 @@ foreach ($requiredVariable in @(
     'JWT_SECRET',
     'JWT_COOKIE_SECURE',
     'BACKEND_PORT',
-    'FRONTEND_PORT'
+    'FRONTEND_PORT',
+    'PASSWORD_RESET_ENABLED',
+    'MEMBER_SEARCH_ENABLED',
+    'PUBLIC_DATA_LIVE_SEARCH_ENABLED',
+    'PUBLIC_DATA_MANUAL_IMPORT_ENABLED'
 )) {
     Assert-Pattern -Content $rootEnvironment -Pattern "(?m)^${requiredVariable}=" `
         -Message ".env.example must declare $requiredVariable"
@@ -86,6 +90,10 @@ foreach ($optionalVariable in @(
 $frontendEnvironment = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'Frontend/.env.example') -Raw -Encoding utf8
 Assert-Pattern -Content $frontendEnvironment -Pattern '(?m)^BACKEND_ORIGIN=\s*$' `
     -Message 'Frontend/.env.example must declare an empty BACKEND_ORIGIN placeholder'
+foreach ($frontendFeatureVariable in @('VITE_PASSWORD_RESET_ENABLED', 'VITE_MEMBER_SEARCH_ENABLED')) {
+    Assert-Pattern -Content $frontendEnvironment -Pattern "(?m)^${frontendFeatureVariable}=true\s*$" `
+        -Message "Frontend/.env.example must keep local feature $frontendFeatureVariable enabled"
+}
 
 $frontendPackage = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'Frontend/package.json') -Raw -Encoding utf8 |
     ConvertFrom-Json
@@ -115,6 +123,21 @@ foreach ($secretVariable in @('DB_URL', 'DB_USERNAME', 'DB_PASSWORD', 'JWT_SECRE
         -Pattern "(?ms)^\s*-\s+key:\s*${secretVariable}\s*\r?\n\s+sync:\s*false\s*$" `
         -Message "Render secret $secretVariable must be entered through the Dashboard (sync: false)"
 }
+foreach ($disabledFeature in @(
+    'PASSWORD_RESET_ENABLED',
+    'MEMBER_SEARCH_ENABLED',
+    'PUBLIC_DATA_LIVE_SEARCH_ENABLED',
+    'PUBLIC_DATA_MANUAL_IMPORT_ENABLED'
+)) {
+    Assert-Pattern -Content $renderConfig `
+        -Pattern ('(?ms)^\s*-\s+key:\s*{0}\s*\r?\n\s+value:\s*["'']?false["'']?\s*$' -f [regex]::Escape($disabledFeature)) `
+        -Message "Render must keep public feature $disabledFeature disabled"
+}
+Assert-Pattern -Content $renderConfig `
+    -Pattern '(?ms)^\s*-\s+key:\s*NOTICE_ADMIN_EMAILS\s*\r?\n\s+value:\s*["'']?\s*["'']?\s*$' `
+    -Message 'Render must not grant notice administration through a default email'
+Assert-Pattern -Content $rootEnvironment -Pattern 'channelBinding=require' `
+    -Message 'The Neon JDBC example must require PostgreSQL channel binding'
 Write-Host 'OK: environment examples and Render deployment contract'
 
 $composeConfig = Get-Content -LiteralPath (Join-Path $RepositoryRoot 'docker-compose.yml') -Raw -Encoding utf8

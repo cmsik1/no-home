@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { seoulDistricts } from '../houseSearchParams'
-import { DEAL_MODE_OPTIONS, NOTICE_ADMIN_EMAILS } from '../config/appConfig'
+import { DEAL_MODE_OPTIONS, MEMBER_SEARCH_ENABLED, NOTICE_ADMIN_EMAILS } from '../config/appConfig'
 import { useAgentCommands } from './useAgentCommands'
 import { useHouseSearch } from './useHouseSearch'
 import { useInterestRegions } from './useInterestRegions'
@@ -41,6 +41,7 @@ export function useAppController() {
 
   const memberAccount = useMemberAccount({ setActivePage })
   const isNoticeAdmin = Boolean(memberAccount.member?.email && NOTICE_ADMIN_EMAILS.includes(String(memberAccount.member.email).trim().toLowerCase()))
+  const canSearchMembers = MEMBER_SEARCH_ENABLED && isNoticeAdmin
   const notices = useNotices({ isNoticeAdmin })
   const interests = useInterestRegions({
     member: memberAccount.member,
@@ -91,7 +92,7 @@ export function useAppController() {
   }
 
   const openMemberSearchPage = () => {
-    if (!isNoticeAdmin) {
+    if (!canSearchMembers) {
       memberAccount.setMemberError('관리자만 회원 검색을 사용할 수 있습니다.')
       return
     }
@@ -120,6 +121,7 @@ export function useAppController() {
     interests,
     agent,
     isNoticeAdmin,
+    canSearchMembers,
     accountSummary,
     mapStatusLabel,
     seoulDistricts,

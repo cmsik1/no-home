@@ -15,6 +15,7 @@ export default function App() {
       member: controller.memberAccount.member,
       memberLoading: controller.memberAccount.memberLoading,
       isNoticeAdmin: controller.isNoticeAdmin,
+      canSearchMembers: controller.canSearchMembers,
       accountSummary: controller.accountSummary,
     }}>
       <div className="app-shell">

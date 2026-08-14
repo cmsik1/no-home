@@ -1,5 +1,7 @@
 package com.ssafy.home.publicdata.service;
 
+import com.ssafy.home.common.feature.DeploymentFeaturePolicy;
+import com.ssafy.home.common.feature.FeatureDisabledException;
 import com.ssafy.home.publicdata.dto.PublicDataImportResult;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +41,17 @@ class PublicDataImportFacadeTest {
         assertThatThrownBy(() -> facade.importAptDeals("11590", "202405", "unknown"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unsupported dealMode");
+    }
+
+    @Test
+    void disabledManualImportStopsBeforeExternalServices() {
+        PublicDataImportFacade disabledFacade = new PublicDataImportFacade(tradeService, rentService,
+                new DeploymentFeaturePolicy(true, true, true, false));
+
+        assertThatThrownBy(() -> disabledFacade.importAptDeals("11590", "202405", "sale"))
+                .isInstanceOf(FeatureDisabledException.class)
+                .hasMessage("FEATURE_DISABLED");
+        verifyNoInteractions(tradeService, rentService);
     }
 
     private static PublicDataImportResult result(String source) {
