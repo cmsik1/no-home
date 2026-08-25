@@ -19,6 +19,7 @@
 
 - Neon DB, Render Backend, Vercel Frontend를 실제로 연결한다.
 - 핵심 사용자 흐름을 공개 환경에서 검증한다.
+- 완료: NOHOME-24~27에서 Neon 운영 DB를 Flyway `V1`부터 초기화하고, Render·Vercel 기본 HTTPS 도메인 연결, Secure 세션 인증과 운영 기능 차단 정책을 공개 환경에서 검증했다. 실제 URL·DB 접속 정보·비밀값은 작업 문서에 기록하지 않는다.
 
 ## M4. 운영 안정화 및 문서화
 
