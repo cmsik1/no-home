@@ -47,6 +47,8 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
             violations.add("DB_URL must be a PostgreSQL JDBC URL");
         } else if (isNeonUrl(databaseUrl) && !usesTls(databaseUrl)) {
             violations.add("Neon DB_URL must enable TLS with sslmode=require or stronger");
+        } else if (isNeonUrl(databaseUrl) && !usesRequiredChannelBinding(databaseUrl)) {
+            violations.add("Neon DB_URL must enable channelBinding=require");
         }
         if (!hasText(databaseUsername)) {
             violations.add("DB_USERNAME is required");
@@ -75,5 +77,9 @@ public class ProductionEnvironmentPostProcessor implements EnvironmentPostProces
     private static boolean usesTls(String databaseUrl) {
         String normalized = databaseUrl.toLowerCase();
         return normalized.matches(".*[?&]sslmode=(require|verify-ca|verify-full)(&.*)?$");
+    }
+
+    private static boolean usesRequiredChannelBinding(String databaseUrl) {
+        return databaseUrl.toLowerCase().matches(".*[?&]channelbinding=require(&.*)?$");
     }
 }

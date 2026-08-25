@@ -4,7 +4,7 @@ services:
     name: no-home-backend
     runtime: docker
     plan: free
-    region: singapore
+    region: ohio
     dockerContext: ./Backend
     dockerfilePath: ./Backend/Dockerfile
     healthCheckPath: /api/health

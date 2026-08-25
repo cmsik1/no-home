@@ -53,10 +53,19 @@ class ProductionEnvironmentPostProcessorTest {
     @Test
     void rejectsNeonUrlWithoutTls() {
         assertThatThrownBy(() -> ProductionEnvironmentPostProcessor.validate(
-                "jdbc:postgresql://ep-example.ap-southeast-1.aws.neon.tech/nohome",
+                "jdbc:postgresql://ep-example.ap-southeast-1.aws.neon.tech/nohome?channelBinding=require",
                 "nohome", "database-password", STRONG_SECRET, "true"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Neon DB_URL")
                 .hasMessageContaining("sslmode");
+    }
+
+    @Test
+    void rejectsNeonUrlWithoutRequiredChannelBinding() {
+        assertThatThrownBy(() -> ProductionEnvironmentPostProcessor.validate(
+                "jdbc:postgresql://ep-example.ap-southeast-1.aws.neon.tech/nohome?sslmode=require",
+                "nohome", "database-password", STRONG_SECRET, "true"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("channelBinding=require");
     }
 }
